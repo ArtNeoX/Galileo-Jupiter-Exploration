@@ -14,6 +14,7 @@ namespace Galileo.Content
         public ObjectivesData objectives = new ObjectivesData();
         public DialogData missionDialog = new DialogData();
         public ConceptsData concepts = new ConceptsData();
+        public OrbiterDesignData orbiterDesign = new OrbiterDesignData();
 
         public CharacterProfile FindCharacter(string id)
         {
@@ -42,6 +43,23 @@ namespace Galileo.Content
         public string endBody = "Следующие сцены будут добавлены позже.";
         public string chosenFormat = "Ваш выбор: {0}";
         public string restart = "Начать заново";
+        public string explanationPlaceholder = "[Пояснение будет добавлено позже]";
+
+        // Scene 4
+        public string back = "Назад";
+        public string test = "Испытать";
+        public string tryAgain = "Попробовать снова";
+        public string testInProgress = "Идёт испытание";
+        public string standBy = "Пожалуйста, ожидайте";
+        public string successfulTest = "Испытание успешно";
+        public string unsuccessfulTest = "Испытание не пройдено";
+        public string problemLabel = "Инженерная проблема";
+        public string behaviorLabel = "Поведение в космической среде";
+        public string whyChosenLabel = "Почему выбран для Galileo";
+        public string whyNotChosenLabel = "Почему не выбран для Galileo";
+        public string recommendationLabel = "Рекомендация инженерной группы";
+        public string finalDecisionLabel = "Итоговое решение";
+        public string designedFormat = "Спроектировано систем: {0} из {1}";
     }
 
     [Serializable]
@@ -104,6 +122,56 @@ namespace Galileo.Content
         public string icon;
         /// <summary>The historically chosen variant. Not shown to the player; kept for later scenes.</summary>
         public bool correct;
+        /// <summary>Render in Resources/Galileo/Backgrounds the background fades to when this concept is selected.</summary>
+        public string background;
+        /// <summary>What a random team member says when this (wrong) concept is chosen.</summary>
+        public string[] wrongChoiceLines = Array.Empty<string>();
+    }
+
+    /// <summary>Runtime-only: what the dialog screen should play and where to go afterwards.</summary>
+    public class DialogRequest
+    {
+        public string speakerId;
+        public string[] lines;
+        public Action onFinished;
+    }
+
+    [Serializable]
+    public class OrbiterDesignData
+    {
+        public string title = "Проектирование космического зонда";
+        public string subtitle = "";
+        public string hint = "";
+        public DesignSystemInfo[] systems = Array.Empty<DesignSystemInfo>();
+    }
+
+    [Serializable]
+    public class DesignSystemInfo
+    {
+        public string id;
+        public string title;
+        public string subtitle;
+        public string problem;
+        public string task;
+        public string finalDecision;
+        /// <summary>Characters on the left and right of the system screen; each presents one option.</summary>
+        public string[] speakers = Array.Empty<string>();
+        public DesignOptionInfo[] options = Array.Empty<DesignOptionInfo>();
+    }
+
+    [Serializable]
+    public class DesignOptionInfo
+    {
+        public string name;
+        public string icon;
+        public string behavior;
+        public string pros;
+        public string cons;
+        public string why;
+        public bool correct;
+        public string resultTitle;
+        public string result;
+        public string recommendation;
     }
 
     public static class ContentLoader

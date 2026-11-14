@@ -139,5 +139,39 @@ namespace Galileo.UI
             btn.onClick.AddListener(() => onClick?.Invoke());
             return btn;
         }
+
+        /// <summary>Square accent button holding a single icon (e.g. the back chevron).</summary>
+        public static Button IconButton(string name, Transform parent, Sprite icon, Action onClick)
+        {
+            var btn = Button(name, parent, "", onClick);
+            UnityEngine.Object.Destroy(btn.transform.Find("Label").gameObject);
+            Picture("Icon", btn.transform, icon, Theme.ButtonText).rectTransform.Stretch(14, 14, 14, 14);
+            return btn;
+        }
+
+        /// <summary>
+        /// Dark speech-bubble style button: text on the left, ▶ on the right. Used for the design options.
+        /// </summary>
+        public static Button ChoiceButton(string name, Transform parent, string label, Action onClick)
+        {
+            var img = Panel(name, parent, Color.white, 16);
+            var btn = img.gameObject.AddComponent<Button>();
+            btn.targetGraphic = img;
+            var colors = btn.colors;
+            colors.normalColor = Theme.PanelDark;
+            colors.highlightedColor = Theme.PanelHover;
+            colors.pressedColor = Theme.PanelDeep;
+            colors.selectedColor = Theme.PanelDark;
+            colors.colorMultiplier = 1f;
+            colors.fadeDuration = 0.1f;
+            btn.colors = colors;
+            Frame(img.transform, Theme.AccentDark, 16, 2);
+            Label("Label", img.transform, label, 30, Theme.Text, TextAnchor.MiddleLeft, FontStyle.Bold).BestFit(20, 30)
+                .rectTransform.Stretch(28, 10, 76, 10);
+            Picture("Arrow", img.transform, ProceduralArt.Icon("play"), Theme.Accent).rectTransform
+                .Pin(new Vector2(1f, 0.5f), new Vector2(30, 30), new Vector2(-28, 0));
+            btn.onClick.AddListener(() => onClick?.Invoke());
+            return btn;
+        }
     }
 }

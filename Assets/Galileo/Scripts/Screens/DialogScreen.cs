@@ -22,9 +22,9 @@ namespace Galileo.Screens
         protected override void Build()
         {
             MakeClickable(Advance);
-            var dialog = Content.missionDialog;
+            var dialog = App.PendingDialog;
             var speaker = Content.FindCharacter(dialog.speakerId);
-            _lines = dialog.lines;
+            _lines = dialog.lines ?? new string[0];
 
             // Character bitmap, centred
             var portraitBox = UIFactory.Panel("PortraitBox", Root, Theme.PanelDeep, 16);
@@ -50,7 +50,7 @@ namespace Galileo.Screens
             _indicator = UIFactory.Picture("Continue", box.transform, ProceduralArt.Icon("triangle_down"), Theme.Accent);
             _indicator.rectTransform.Pin(new Vector2(1, 0), new Vector2(34, 34), new Vector2(-44, 34));
 
-            if (_lines.Length == 0) { App.ShowConcepts(); return; }
+            if (_lines.Length == 0) { Finish(); return; }
             Advance();
         }
 
@@ -72,11 +72,18 @@ namespace Galileo.Screens
             }
             if (_index >= _lines.Length - 1)
             {
-                App.ShowConcepts();
+                Finish();
                 return;
             }
             _index++;
             _typing = StartCoroutine(Type(_lines[_index]));
+        }
+
+        void Finish()
+        {
+            var next = App.PendingDialog?.onFinished;
+            if (next != null) next();
+            else App.ShowEnd();
         }
 
         IEnumerator Type(string text)

@@ -39,11 +39,7 @@ namespace Galileo.Screens
             if (!string.IsNullOrEmpty(data.hint))
                 UIFactory.Label("Hint", Root, data.hint, 22, Theme.TextMuted, TextAnchor.MiddleLeft, FontStyle.Italic)
                     .rectTransform.Anchor(new Vector2(0, 0), new Vector2(1, 0), new Vector2(120, 40), new Vector2(-420, 80));
-            _next = NextButton(() =>
-            {
-                App.SelectedConcept = _selected;
-                App.ShowEnd();
-            });
+            _next = NextButton(() => App.ConfirmConcept(_selected));
             _next.interactable = false;
         }
 
@@ -74,6 +70,7 @@ namespace Galileo.Screens
         {
             Expand(target);
             _selected = _concepts[target];
+            App.SetBackground(_selected.background);
             foreach (var card in _cards) card.SetSelected(card == target);
             _selectedLabel.text = string.Format(Ui.selectedFormat, _selected.letter);
             _next.interactable = true;

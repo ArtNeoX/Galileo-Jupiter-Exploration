@@ -55,6 +55,35 @@ namespace Galileo.Screens
             return btn;
         }
 
+        protected Button BackButton(System.Action onClick)
+        {
+            var btn = UIFactory.IconButton("Back", Root, ProceduralArt.Icon("chevron_left"), onClick);
+            btn.GetComponent<RectTransform>().Pin(new Vector2(0, 1), new Vector2(72, 72), new Vector2(60, -55));
+            return btn;
+        }
+
+        /// <summary>Framed character bitmap with the name underneath. Size/position it via the returned rect.</summary>
+        protected RectTransform PortraitCard(Transform parent, string characterId)
+        {
+            var box = UIFactory.Panel("Portrait " + characterId, parent, Theme.PanelDeep, 16);
+            box.raycastTarget = false;
+            UIFactory.Frame(box.transform, Theme.Line, 16, 2);
+            var portrait = UIFactory.Picture("Portrait", box.transform, null, Color.white);
+            portrait.rectTransform.Stretch(12, 12, 12, 12);
+            ApplyPortrait(portrait, characterId);
+            var person = Content.FindCharacter(characterId);
+            UIFactory.Label("Name", box.transform, person != null ? person.name : "", 22, Theme.TextMuted, TextAnchor.UpperCenter, FontStyle.Bold)
+                .rectTransform.Anchor(new Vector2(0, 0), new Vector2(1, 0), new Vector2(-40, -40), new Vector2(40, -8));
+            return box.rectTransform;
+        }
+
+        protected static string Section(string label, string text, string colorHex = null)
+        {
+            if (string.IsNullOrEmpty(text)) return "";
+            var color = colorHex ?? Theme.AccentHex;
+            return $"<color={color}><b>{label}:</b></color>\n{text}\n\n";
+        }
+
         protected Text FooterLabel(string text)
         {
             var label = UIFactory.Label("Footer", Root, text, 26, Theme.TextMuted, TextAnchor.MiddleLeft);

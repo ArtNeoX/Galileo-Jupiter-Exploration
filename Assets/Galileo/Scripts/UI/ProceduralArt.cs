@@ -158,6 +158,75 @@ namespace Galileo.UI
                         Max(Circle(p, new Vector2(0f, -0.95f), 0.72f), -(p.y + 0.92f)));
                 case "triangle_down":
                     return p => ConvexPolygon(p, new Vector2(0f, -0.5f), new Vector2(0.65f, 0.4f), new Vector2(-0.65f, 0.4f));
+                // ----- Scene 4 UI symbols -----
+                case "check":
+                    return p => Min(
+                        Ring(p, Vector2.zero, 0.82f, W),
+                        Segment(p, new Vector2(-0.38f, 0.02f), new Vector2(-0.1f, -0.28f), W * 1.4f),
+                        Segment(p, new Vector2(-0.1f, -0.28f), new Vector2(0.42f, 0.32f), W * 1.4f));
+                case "cross":
+                    return p => Min(
+                        Ring(p, Vector2.zero, 0.82f, W),
+                        Segment(p, new Vector2(-0.32f, -0.32f), new Vector2(0.32f, 0.32f), W * 1.4f),
+                        Segment(p, new Vector2(-0.32f, 0.32f), new Vector2(0.32f, -0.32f), W * 1.4f));
+                case "pending":
+                    return p => Circle(p, Vector2.zero, 0.42f);
+                case "chevron_left":
+                    return p => Min(
+                        Segment(p, new Vector2(0.2f, 0.48f), new Vector2(-0.26f, 0f), W * 2f),
+                        Segment(p, new Vector2(-0.26f, 0f), new Vector2(0.2f, -0.48f), W * 2f));
+                case "play":
+                    return p => ConvexPolygon(p, new Vector2(-0.4f, -0.5f), new Vector2(0.5f, 0f), new Vector2(-0.4f, 0.5f));
+                case "spinner":
+                    return p => Max(Ring(p, Vector2.zero, 0.7f, W * 1.6f), p.x > 0f && p.y < 0f ? 1f : -1f);
+
+                // ----- Scene 4 design options -----
+                case "vault": // aluminium radiation vault: box around a chip
+                    return p => Min(
+                        Outline(RectSdf(p, Vector2.zero, 0.68f, 0.68f), W * 1.4f),
+                        RectSdf(p, Vector2.zero, 0.22f, 0.22f),
+                        Segment(p, new Vector2(-0.4f, 0.12f), new Vector2(0.4f, 0.12f), W * 0.5f),
+                        Segment(p, new Vector2(-0.4f, -0.12f), new Vector2(0.4f, -0.12f), W * 0.5f));
+                case "dense_shield": // tantalum: heavy solid plate
+                    return p => Min(
+                        Outline(RectSdf(p, Vector2.zero, 0.7f, 0.5f), W),
+                        RectSdf(p, Vector2.zero, 0.55f, 0.35f));
+                case "layers": // multilayer insulation
+                    return p => Min(
+                        Segment(p, new Vector2(-0.7f, 0.5f), new Vector2(0.55f, 0.5f), W),
+                        Segment(p, new Vector2(-0.6f, 0.17f), new Vector2(0.65f, 0.17f), W),
+                        Segment(p, new Vector2(-0.7f, -0.17f), new Vector2(0.55f, -0.17f), W),
+                        Segment(p, new Vector2(-0.6f, -0.5f), new Vector2(0.65f, -0.5f), W));
+                case "coolant": // pumped liquid loop
+                    return p => Min(
+                        Outline(RectSdf(p, Vector2.zero, 0.6f, 0.42f) - 0.15f, W),
+                        Circle(p, new Vector2(0.75f, 0f), 0.16f),
+                        ConvexPolygon(p, new Vector2(-0.15f, 0.47f), new Vector2(0.05f, 0.57f), new Vector2(0.05f, 0.37f)));
+                case "panels": // aluminium structural panels
+                    return p => Min(
+                        Outline(RectSdf(p, Vector2.zero, 0.7f, 0.6f), W),
+                        Segment(p, new Vector2(0f, -0.6f), new Vector2(0f, 0.6f), W * 0.7f),
+                        Segment(p, new Vector2(-0.7f, 0f), new Vector2(0.7f, 0f), W * 0.7f));
+                case "truss": // titanium primary frame
+                    return p => Min(
+                        Outline(RectSdf(p, Vector2.zero, 0.7f, 0.6f), W * 1.3f),
+                        Segment(p, new Vector2(-0.7f, -0.6f), new Vector2(0.7f, 0.6f), W),
+                        Segment(p, new Vector2(-0.7f, 0.6f), new Vector2(0.7f, -0.6f), W));
+                case "rtg": // finned cylinder
+                    return p => Min(
+                        Outline(RectSdf(p, Vector2.zero, 0.22f, 0.72f), W),
+                        Segment(p, new Vector2(-0.62f, 0.4f), new Vector2(0.62f, 0.4f), W),
+                        Segment(p, new Vector2(-0.62f, 0f), new Vector2(0.62f, 0f), W),
+                        Segment(p, new Vector2(-0.62f, -0.4f), new Vector2(0.62f, -0.4f), W));
+                case "solar": // body with two solar wings
+                    return p => Min(
+                        RectSdf(p, Vector2.zero, 0.13f, 0.18f),
+                        Outline(RectSdf(p, new Vector2(-0.55f, 0f), 0.3f, 0.45f), W * 0.8f),
+                        Outline(RectSdf(p, new Vector2(0.55f, 0f), 0.3f, 0.45f), W * 0.8f),
+                        Segment(p, new Vector2(-0.55f, -0.45f), new Vector2(-0.55f, 0.45f), W * 0.5f),
+                        Segment(p, new Vector2(0.55f, -0.45f), new Vector2(0.55f, 0.45f), W * 0.5f),
+                        Segment(p, new Vector2(-0.25f, 0f), new Vector2(0.25f, 0f), W * 0.6f));
+
                 default:
                     return p => Circle(p, Vector2.zero, 0.4f);
             }
@@ -180,6 +249,8 @@ namespace Galileo.UI
         static float Circle(Vector2 p, Vector2 c, float r) => (p - c).magnitude - r;
         static float Ring(Vector2 p, Vector2 c, float r, float w) => Mathf.Abs((p - c).magnitude - r) - w * 0.5f;
         static float Box(Vector2 p, float half) => Mathf.Max(Mathf.Abs(p.x), Mathf.Abs(p.y)) - half;
+        static float RectSdf(Vector2 p, Vector2 c, float hx, float hy) => Mathf.Max(Mathf.Abs(p.x - c.x) - hx, Mathf.Abs(p.y - c.y) - hy);
+        static float Outline(float sdf, float w) => Mathf.Abs(sdf) - w * 0.5f;
 
         static float EllipseRing(Vector2 p, Vector2 c, float rx, float ry, float w)
         {

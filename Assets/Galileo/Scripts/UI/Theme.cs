@@ -20,6 +20,7 @@ namespace Galileo.UI
         public static readonly Color Panel = Hex(Brown, 0.96f);
         public static readonly Color PanelDark = Hex(BrownDark);
         public static readonly Color PanelDeep = Hex(Charcoal);
+        public static readonly Color PanelHover = Hex("4A362F");
         public static readonly Color Line = Hex("5A483F");
         public static readonly Color Accent = Hex(Cream);
         public static readonly Color AccentBright = Hex("FFF5E2");
@@ -31,6 +32,7 @@ namespace Galileo.UI
         public static readonly Color Icon = Hex(Cream, 0.9f);
         public static readonly Color Placeholder = Hex("4A3A33");
         public static readonly Color Success = Hex("9CC48A");
+        public static readonly Color Failure = Hex("E8705F");
 
         /// <summary>Rich-text colours (title highlights, pros in green, cons in red), tuned for the brown panels.</summary>
         public const string AccentHex = "#F2E3C6";
