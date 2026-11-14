@@ -15,6 +15,7 @@ namespace Galileo.Content
         public DialogData missionDialog = new DialogData();
         public ConceptsData concepts = new ConceptsData();
         public OrbiterDesignData orbiterDesign = new OrbiterDesignData();
+        public DialogData atmosProbeDialog = new DialogData();
 
         public CharacterProfile FindCharacter(string id)
         {
@@ -97,8 +98,15 @@ namespace Galileo.Content
     [Serializable]
     public class DialogData
     {
+        /// <summary>Character id. Leave empty to pick a random team member.</summary>
         public string speakerId;
         public string[] lines = Array.Empty<string>();
+        /// <summary>Optional render in Resources/Galileo/Backgrounds the background fades to when this dialog opens.</summary>
+        public string background;
+        /// <summary>Darken the background render behind this dialog (off lets the render's details show).</summary>
+        public bool dim = true;
+        /// <summary>Put the character on the left instead of the centre, leaving the render visible.</summary>
+        public bool portraitLeft;
     }
 
     [Serializable]
@@ -133,6 +141,7 @@ namespace Galileo.Content
     {
         public string speakerId;
         public string[] lines;
+        public bool portraitLeft;
         public Action onFinished;
     }
 

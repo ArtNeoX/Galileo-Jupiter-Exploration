@@ -29,7 +29,10 @@ namespace Galileo.Screens
             // Character bitmap, centred
             var portraitBox = UIFactory.Panel("PortraitBox", Root, Theme.PanelDeep, 16);
             portraitBox.raycastTarget = false;
-            portraitBox.rectTransform.Pin(new Vector2(0.5f, 1f), new Vector2(460, 560), new Vector2(0, -70));
+            if (dialog.portraitLeft) // aligned with the dialog box's left edge
+                portraitBox.rectTransform.Pin(new Vector2(0f, 1f), new Vector2(460, 560), new Vector2(180, -70));
+            else
+                portraitBox.rectTransform.Pin(new Vector2(0.5f, 1f), new Vector2(460, 560), new Vector2(0, -70));
             UIFactory.Frame(portraitBox.transform, Theme.Line, 16, 2);
             var portrait = UIFactory.Picture("Portrait", portraitBox.transform, null, Color.white);
             portrait.rectTransform.Stretch(14, 14, 14, 14);

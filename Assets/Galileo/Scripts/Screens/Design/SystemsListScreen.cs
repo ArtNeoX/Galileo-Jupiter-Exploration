@@ -39,7 +39,7 @@ namespace Galileo.Screens
             if (!string.IsNullOrEmpty(data.hint))
                 UIFactory.Label("Hint", Root, data.hint, 22, Theme.TextMuted, TextAnchor.MiddleLeft, FontStyle.Italic)
                     .rectTransform.Anchor(new Vector2(0, 0), new Vector2(1, 0), new Vector2(120, 40), new Vector2(-420, 80));
-            NextButton(App.ShowEnd).interactable = done == data.systems.Length;
+            NextButton(App.ShowAtmosProbeDialog).interactable = done == data.systems.Length;
         }
 
         void BuildRow(Transform list, DesignSystemInfo system, bool complete)

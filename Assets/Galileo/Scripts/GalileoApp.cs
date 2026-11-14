@@ -57,6 +57,7 @@ namespace Galileo
             CompletedSystems.Clear();
             _optionOrder.Clear();
             SetBackground(defaultBackground);
+            SetBackgroundDim(true);
             ShowCharacters();
         }
 
@@ -65,9 +66,10 @@ namespace Galileo
         /// <summary>The dialog the next <see cref="DialogScreen"/> plays.</summary>
         public DialogRequest PendingDialog { get; private set; }
 
-        public void ShowDialog(string speakerId, string[] lines, System.Action onFinished)
+        public void ShowDialog(string speakerId, string[] lines, System.Action onFinished, bool portraitLeft = false)
         {
-            PendingDialog = new DialogRequest { speakerId = speakerId, lines = lines, onFinished = onFinished };
+            PendingDialog = new DialogRequest
+                { speakerId = speakerId, lines = lines, onFinished = onFinished, portraitLeft = portraitLeft };
             Show<DialogScreen>();
         }
 
@@ -117,10 +119,44 @@ namespace Galileo
 
         public void RunTest() => Show<TestScreen>();
 
+        /// <summary>Shortcut: pressing L anywhere in Scene 4 completes every system and moves on.</summary>
+        void Update()
+        {
+            var k = UnityEngine.InputSystem.Keyboard.current;
+            if (k == null || !k.lKey.wasPressedThisFrame) return;
+            if (_current is SystemsListScreen || _current is SystemScreen ||
+                _current is OptionScreen || _current is TestScreen)
+                SkipOrbiterDesign();
+        }
+
+        public void SkipOrbiterDesign()
+        {
+            foreach (var system in Content.orbiterDesign.systems)
+                CompletedSystems.Add(system.id);
+            ShowAtmosProbeDialog();
+        }
+
         public void CompleteCurrentSystem()
         {
             CompletedSystems.Add(CurrentSystem.id);
             ShowOrbiterDesign();
+        }
+
+        // ---------- Scene 5: Atmospheric probe ----------
+
+        /// <summary>
+        /// Orbiter design done → a random team member introduces the atmospheric probe while the
+        /// background fades to the atmospheric probe render.
+        /// </summary>
+        public void ShowAtmosProbeDialog()
+        {
+            var dialog = Content.atmosProbeDialog;
+            SetBackground(string.IsNullOrEmpty(dialog.background) ? "render_conceptC_Atmos_probe" : dialog.background);
+            SetBackgroundDim(dialog.dim);
+            var speaker = dialog.speakerId;
+            if (string.IsNullOrEmpty(speaker) && Content.characters.Length > 0)
+                speaker = Content.characters[Random.Range(0, Content.characters.Length)].id;
+            ShowDialog(speaker, dialog.lines, ShowEnd, dialog.portraitLeft);
         }
 
         /// <summary>
@@ -227,6 +263,30 @@ namespace Galileo
 
             if (_backgroundFade != null) StopCoroutine(_backgroundFade);
             _backgroundFade = StartCoroutine(FadeBackground(img, fadeSeconds));
+        }
+
+        Coroutine _dimFade;
+
+        /// <summary>Fades the darkening layer over the render in (on) or out (off).</summary>
+        public void SetBackgroundDim(bool on, float fadeSeconds = 0.8f)
+        {
+            if (_dimFade != null) StopCoroutine(_dimFade);
+            _dimFade = StartCoroutine(FadeDim(on ? Theme.BackgroundDim.a : 0f, fadeSeconds));
+        }
+
+        System.Collections.IEnumerator FadeDim(float target, float duration)
+        {
+            var c = _backgroundDim.color;
+            float from = c.a;
+            for (float t = 0; t < duration; t += Time.unscaledDeltaTime)
+            {
+                c.a = Mathf.Lerp(from, target, Mathf.SmoothStep(0f, 1f, t / duration));
+                _backgroundDim.color = c;
+                yield return null;
+            }
+            c.a = target;
+            _backgroundDim.color = c;
+            _dimFade = null;
         }
 
         System.Collections.IEnumerator FadeBackground(Image incoming, float duration)
