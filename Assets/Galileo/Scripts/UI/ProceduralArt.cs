@@ -18,6 +18,10 @@ namespace Galileo.UI
         public static Sprite VerticalGradient(Color top, Color bottom) =>
             Cached("grad" + top + bottom, () => BuildGradient(top, bottom));
         public static Sprite Icon(string id) => Cached("icon_" + id, () => BuildIcon(id));
+        /// <summary>Same shapes as <see cref="Icon"/>, rendered at a custom resolution (for large placeholders).</summary>
+        public static Sprite Shape(string id, int size) => Cached($"shape_{id}_{size}", () => BuildIcon(id, size));
+        /// <summary>Soft radial falloff, white in the centre and transparent at the edge (Sun glow).</summary>
+        public static Sprite Glow() => Cached("glow", BuildGlow);
 
         static Sprite Cached(string key, Func<Sprite> make)
         {
@@ -75,9 +79,25 @@ namespace Galileo.UI
 
         const float W = 0.07f; // stroke width
 
-        static Sprite BuildIcon(string id)
+        static Sprite BuildGlow()
         {
-            const int size = 256;
+            const int size = 128;
+            var tex = NewTexture(size, size);
+            var px = new Color32[size * size];
+            for (int y = 0; y < size; y++)
+            for (int x = 0; x < size; x++)
+            {
+                float d = new Vector2((x + 0.5f) / size * 2f - 1f, (y + 0.5f) / size * 2f - 1f).magnitude;
+                float a = Mathf.Pow(Mathf.Clamp01(1f - d), 2.2f);
+                px[y * size + x] = new Color32(255, 255, 255, (byte)(a * 255));
+            }
+            tex.SetPixels32(px);
+            tex.Apply(false, true);
+            return Sprite.Create(tex, new Rect(0, 0, size, size), new Vector2(0.5f, 0.5f), 100f);
+        }
+
+        static Sprite BuildIcon(string id, int size = 256)
+        {
             var tex = NewTexture(size, size);
             var px = new Color32[size * size];
             float pixel = 2f / size;
@@ -226,6 +246,38 @@ namespace Galileo.UI
                         Segment(p, new Vector2(-0.55f, -0.45f), new Vector2(-0.55f, 0.45f), W * 0.5f),
                         Segment(p, new Vector2(0.55f, -0.45f), new Vector2(0.55f, 0.45f), W * 0.5f),
                         Segment(p, new Vector2(-0.25f, 0f), new Vector2(0.25f, 0f), W * 0.6f));
+
+                // ----- Gravity assist / launch -----
+                case "disc":
+                    return p => Circle(p, Vector2.zero, 0.94f);
+                case "ring":
+                    return p => Ring(p, Vector2.zero, 0.84f, 0.14f);
+                case "x_mark":
+                    return p => Min(
+                        Segment(p, new Vector2(-0.7f, -0.7f), new Vector2(0.7f, 0.7f), 0.3f),
+                        Segment(p, new Vector2(-0.7f, 0.7f), new Vector2(0.7f, -0.7f), 0.3f));
+                case "shuttle": // front view of the stack: external tank, two boosters, orbiter with wings
+                    return p => Min(
+                        Min(RectSdf(p, new Vector2(0f, -0.12f), 0.15f, 0.7f), Circle(p, new Vector2(0f, 0.55f), 0.15f),
+                            ConvexPolygon(p, new Vector2(-0.15f, 0.55f), new Vector2(0.15f, 0.55f), new Vector2(0f, 0.95f))),
+                        RectSdf(p, new Vector2(-0.3f, -0.2f), 0.075f, 0.62f),
+                        ConvexPolygon(p, new Vector2(-0.375f, 0.42f), new Vector2(-0.225f, 0.42f), new Vector2(-0.3f, 0.62f)),
+                        RectSdf(p, new Vector2(0.3f, -0.2f), 0.075f, 0.62f),
+                        ConvexPolygon(p, new Vector2(0.225f, 0.42f), new Vector2(0.375f, 0.42f), new Vector2(0.3f, 0.62f)),
+                        RectSdf(p, new Vector2(-0.3f, -0.86f), 0.06f, 0.05f),
+                        RectSdf(p, new Vector2(0.3f, -0.86f), 0.06f, 0.05f),
+                        ConvexPolygon(p, new Vector2(-0.62f, -0.78f), new Vector2(0.62f, -0.78f), new Vector2(0.09f, -0.05f), new Vector2(-0.09f, -0.05f)));
+                case "shuttle_flames": // exhaust plumes; the top edge (y = 0.9) lines up with the bottom of "shuttle"
+                    return p => Min(
+                        ConvexPolygon(p, new Vector2(-0.4f, 0.92f), new Vector2(-0.3f, -0.7f), new Vector2(-0.2f, 0.92f)),
+                        ConvexPolygon(p, new Vector2(0.2f, 0.92f), new Vector2(0.3f, -0.7f), new Vector2(0.4f, 0.92f)),
+                        ConvexPolygon(p, new Vector2(-0.1f, 0.99f), new Vector2(0f, 0.3f), new Vector2(0.1f, 0.99f)));
+                case "cloud":
+                    return p => Min(
+                        Circle(p, new Vector2(-0.45f, -0.15f), 0.35f),
+                        Circle(p, new Vector2(0f, 0.05f), 0.48f),
+                        Circle(p, new Vector2(0.48f, -0.12f), 0.38f),
+                        RectSdf(p, new Vector2(0f, -0.3f), 0.5f, 0.2f));
 
                 default:
                     return p => Circle(p, Vector2.zero, 0.4f);

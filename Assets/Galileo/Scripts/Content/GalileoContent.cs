@@ -16,6 +16,9 @@ namespace Galileo.Content
         public ConceptsData concepts = new ConceptsData();
         public OrbiterDesignData orbiterDesign = new OrbiterDesignData();
         public DialogData atmosProbeDialog = new DialogData();
+        public GravityAssistData gravityAssist = new GravityAssistData();
+        public LaunchData launch = new LaunchData();
+        public string episodeEndText = "КОНЕЦ 1 ЭПИЗОДА";
 
         public CharacterProfile FindCharacter(string id)
         {
@@ -143,6 +146,74 @@ namespace Galileo.Content
         public string[] lines;
         public bool portraitLeft;
         public Action onFinished;
+    }
+
+    /// <summary>Gravity assist scene: pick the launch window on a heliocentric map.</summary>
+    [Serializable]
+    public class GravityAssistData
+    {
+        public string title = "Гравитационный манёвр";
+        public string subtitle = "";
+        /// <summary>Slider range and the correct launch window, as yyyy-MM-dd.</summary>
+        public string rangeStart = "1989-10-01";
+        public string rangeEnd = "1989-12-31";
+        public string windowStart = "1989-10-12";
+        public string windowEnd = "1989-11-21";
+        /// <summary>A handle turns fully green when it is this many days from its correct date or closer.</summary>
+        public int colorRangeDays = 30;
+        public string[] monthsShort = { "ЯНВ", "ФЕВ", "МАР", "АПР", "МАЙ", "ИЮН", "ИЮЛ", "АВГ", "СЕН", "ОКТ", "НОЯ", "ДЕК" };
+        public string sun = "Солнце";
+        public string venus = "Венера";
+        public string earth = "Земля";
+        public string jupiter = "Юпитер";
+        /// <summary>{0} = date the planets are shown at (the start of the chosen window).</summary>
+        public string positionsFormat = "Положение планет на {0}";
+        public string startLabel = "Начало окна";
+        public string endLabel = "Конец окна";
+        public string hint = "";
+        public string correctMessage = "";
+    }
+
+    /// <summary>Launch scene: the three launch attempts of STS-34 with the timing mini-game.</summary>
+    [Serializable]
+    public class LaunchData
+    {
+        /// <summary>{0} minutes, {1} opens, {2} closes (UTC).</summary>
+        public string windowFormat = "Окно запуска: {0} мин ({1}–{2} UTC)";
+        public string utcLabel = "UTC";
+        public string hint = "Нажмите ПРОБЕЛ или кликните, когда указатель в зелёной зоне";
+        public string perfect = "Идеально!";
+        public string good = "Почти";
+        public string miss = "Мимо";
+        public string retry = "Запуск не удался — попробуйте ещё раз";
+        public string windowClosed = "Окно запуска закрылось — попробуйте ещё раз";
+        /// <summary>Launch-window minutes that pass per real second (the UTC clock runs this much faster).</summary>
+        public float windowMinutesPerSecond = 1f;
+        /// <summary>Full left-right-left sweeps of the pointer per second.</summary>
+        public float pointerSpeed = 0.45f;
+        /// <summary>Widths of the zones as a fraction of the bar.</summary>
+        public float greenZone = 0.07f;
+        public float yellowZone = 0.3f;
+        /// <summary>Where the engine-failure cross goes, in the shuttle bitmap's normalised coordinates.</summary>
+        public float crossX = 0.5f;
+        public float crossY = 0.38f;
+        public string successSpeakerId = "";
+        public string[] successLines = Array.Empty<string>();
+        public LaunchAttempt[] attempts = Array.Empty<LaunchAttempt>();
+    }
+
+    [Serializable]
+    public class LaunchAttempt
+    {
+        public string date;
+        public int windowMinutes;
+        public string utcStart;
+        public string utcEnd;
+        /// <summary>engineFailure | badWeather | success</summary>
+        public string outcome;
+        /// <summary>Character id; empty picks a random team member.</summary>
+        public string speakerId;
+        public string[] lines = Array.Empty<string>();
     }
 
     [Serializable]

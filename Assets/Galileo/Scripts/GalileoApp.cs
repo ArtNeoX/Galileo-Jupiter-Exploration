@@ -10,7 +10,8 @@ namespace Galileo
 {
     /// <summary>
     /// Entry point. Builds the canvas and background, then runs the screens in order:
-    /// Scene 1 (characters) → Scene 2 (objectives) → Scene 2.1 (dialog) → Scene 3 (mission concept).
+    /// Scene 1 (characters) → 2 (objectives) → 2.1 (dialog) → 3 (mission concept) → 4 (orbiter design)
+    /// → atmospheric probe dialog → gravity assist → launch (3 attempts) → end of episode 1.
     /// </summary>
     [DisallowMultipleComponent]
     public class GalileoApp : MonoBehaviour
@@ -24,7 +25,7 @@ namespace Galileo
         public GalileoContent Content { get; private set; }
         public ConceptInfo SelectedConcept { get; set; }
 
-        RectTransform _screens;
+        RectTransform _screens, _stageLayer;
         ScreenBase _current;
 
         /// <summary>
@@ -58,6 +59,8 @@ namespace Galileo
             _optionOrder.Clear();
             SetBackground(defaultBackground);
             SetBackgroundDim(true);
+            if (Stage != null) Destroy(Stage.gameObject);
+            Stage = null;
             ShowCharacters();
         }
 
@@ -71,6 +74,13 @@ namespace Galileo
             PendingDialog = new DialogRequest
                 { speakerId = speakerId, lines = lines, onFinished = onFinished, portraitLeft = portraitLeft };
             Show<DialogScreen>();
+        }
+
+        /// <summary>The given character id, or a random team member when it's empty.</summary>
+        public string SpeakerOrRandom(string speakerId)
+        {
+            if (!string.IsNullOrEmpty(speakerId) || Content.characters.Length == 0) return speakerId;
+            return Content.characters[Random.Range(0, Content.characters.Length)].id;
         }
 
         public void ShowMissionDialog() =>
@@ -119,7 +129,7 @@ namespace Galileo
 
         public void RunTest() => Show<TestScreen>();
 
-        /// <summary>Shortcut: pressing L anywhere in Scene 4 completes every system and moves on.</summary>
+        /// <summary>Dev shortcut L: skips the orbiter design, sets the right launch window, or hits the green zone.</summary>
         void Update()
         {
             var k = UnityEngine.InputSystem.Keyboard.current;
@@ -127,6 +137,9 @@ namespace Galileo
             if (_current is SystemsListScreen || _current is SystemScreen ||
                 _current is OptionScreen || _current is TestScreen)
                 SkipOrbiterDesign();
+            else if (_current is GravityAssistScreen gravity)
+                gravity.SetWindow(gravity.CorrectStartDay, gravity.CorrectEndDay);
+            // LaunchScreen handles L itself (stops the pointer in the green zone).
         }
 
         public void SkipOrbiterDesign()
@@ -153,11 +166,39 @@ namespace Galileo
             var dialog = Content.atmosProbeDialog;
             SetBackground(string.IsNullOrEmpty(dialog.background) ? "render_conceptC_Atmos_probe" : dialog.background);
             SetBackgroundDim(dialog.dim);
-            var speaker = dialog.speakerId;
-            if (string.IsNullOrEmpty(speaker) && Content.characters.Length > 0)
-                speaker = Content.characters[Random.Range(0, Content.characters.Length)].id;
-            ShowDialog(speaker, dialog.lines, ShowEnd, dialog.portraitLeft);
+            ShowDialog(SpeakerOrRandom(dialog.speakerId), dialog.lines, ShowGravityAssist, dialog.portraitLeft);
         }
+
+        // ---------- Gravity assist and launch ----------
+
+        public void ShowGravityAssist() => Show<GravityAssistScreen>();
+
+        /// <summary>Launch pad bitmaps; stays on screen behind the launch dialogs.</summary>
+        public LaunchStage Stage { get; private set; }
+        public int LaunchIndex { get; private set; }
+
+        public LaunchAttempt CurrentLaunch =>
+            Content.launch.attempts[Mathf.Clamp(LaunchIndex, 0, Content.launch.attempts.Length - 1)];
+
+        public void StartLaunch()
+        {
+            LaunchIndex = 0;
+            if (Stage == null) Stage = LaunchStage.Create(_stageLayer, Content.launch);
+            Stage.ResetState();
+            Show<LaunchScreen>();
+        }
+
+        public void NextLaunchAttempt()
+        {
+            LaunchIndex = Mathf.Min(LaunchIndex + 1, Content.launch.attempts.Length - 1);
+            Stage.ResetState();
+            Show<LaunchScreen>();
+        }
+
+        /// <summary>Same date again (the last attempt missed the green zone).</summary>
+        public void RetryLaunch() => Show<LaunchScreen>();
+
+        public void ShowEpisodeEnd() => Show<EpisodeEndScreen>();
 
         /// <summary>
         /// The two options in a randomly shuffled order (so the right answer isn't always "A"),
@@ -229,6 +270,7 @@ namespace Galileo
             _backgroundDim.enabled = false;
             SetBackground(defaultBackground, 0f);
 
+            _stageLayer = UIFactory.Rect("Stage", root).Stretch();
             _screens = UIFactory.Rect("Screens", root).Stretch();
         }
 
