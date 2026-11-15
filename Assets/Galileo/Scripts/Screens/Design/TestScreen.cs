@@ -11,6 +11,9 @@ namespace Galileo.Screens
     /// </summary>
     public class TestScreen : ScreenBase
     {
+        public override bool ShowBudget => true;
+        public override bool AllowLanguageToggle => false; // the test is running
+
         const float TestDuration = 3f;
 
         RectTransform _spinner;
@@ -58,6 +61,7 @@ namespace Galileo.Screens
             var system = App.CurrentSystem;
             var option = App.CurrentOption;
             bool success = option.correct;
+            if (success) GameAudio.Play("success", 0.8f);
 
             var card = UIFactory.Panel("Result", Root, Theme.Panel, 24);
             card.raycastTarget = false;

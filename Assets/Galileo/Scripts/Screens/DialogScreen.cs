@@ -24,7 +24,7 @@ namespace Galileo.Screens
             MakeClickable(Advance);
             var dialog = App.PendingDialog;
             var speaker = Content.FindCharacter(dialog.speakerId);
-            _lines = dialog.lines ?? new string[0];
+            _lines = dialog.lines?.Invoke(Content) ?? new string[0];
 
             // Character bitmap, centred
             var portraitBox = UIFactory.Panel("PortraitBox", Root, Theme.PanelDeep, 16);
@@ -39,7 +39,8 @@ namespace Galileo.Screens
             ApplyPortrait(portrait, dialog.speakerId);
 
             // Speaker name, just above the box on the left
-            var speakerName = !string.IsNullOrEmpty(dialog.speakerName) ? dialog.speakerName : speaker != null ? speaker.name : "";
+            var customName = dialog.speakerName?.Invoke(Content);
+            var speakerName = !string.IsNullOrEmpty(customName) ? customName : speaker != null ? speaker.name : "";
             UIFactory.Label("Speaker", Root, speakerName.ToUpperInvariant(), 26, Theme.Accent,
                     TextAnchor.LowerLeft, FontStyle.Bold)
                 .rectTransform.Anchor(new Vector2(0, 0), new Vector2(1, 0), new Vector2(206, 316), new Vector2(-180, 356));
@@ -55,6 +56,8 @@ namespace Galileo.Screens
             _indicator.rectTransform.Pin(new Vector2(1, 0), new Vector2(34, 34), new Vector2(-44, 34));
 
             if (_lines.Length == 0) { Finish(); return; }
+            // Resume on the same line after a language switch.
+            _index = Mathf.Clamp(dialog.index, 0, _lines.Length - 1) - 1;
             Advance();
         }
 
@@ -80,6 +83,7 @@ namespace Galileo.Screens
                 return;
             }
             _index++;
+            if (App.PendingDialog != null) App.PendingDialog.index = _index;
             _typing = StartCoroutine(Type(_lines[_index]));
         }
 

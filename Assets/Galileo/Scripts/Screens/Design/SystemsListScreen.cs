@@ -11,6 +11,8 @@ namespace Galileo.Screens
     /// </summary>
     public class SystemsListScreen : ScreenBase
     {
+        public override bool ShowBudget => true;
+
         protected override void Build()
         {
             var data = Content.orbiterDesign;
@@ -39,7 +41,7 @@ namespace Galileo.Screens
             if (!string.IsNullOrEmpty(data.hint))
                 UIFactory.Label("Hint", Root, data.hint, 22, Theme.TextMuted, TextAnchor.MiddleLeft, FontStyle.Italic)
                     .rectTransform.Anchor(new Vector2(0, 0), new Vector2(1, 0), new Vector2(120, 40), new Vector2(-420, 80));
-            NextButton(App.ShowAtmosProbeDialog).interactable = done == data.systems.Length;
+            NextButton(App.ShowGarage).interactable = done == data.systems.Length;
         }
 
         void BuildRow(Transform list, DesignSystemInfo system, bool complete)
@@ -55,7 +57,11 @@ namespace Galileo.Screens
             colors.fadeDuration = 0.1f;
             button.colors = colors;
             button.interactable = !complete;
-            button.onClick.AddListener(() => App.ShowSystem(system));
+            button.onClick.AddListener(() =>
+            {
+                GameAudio.Click();
+                App.ShowSystem(system);
+            });
 
             var status = UIFactory.Picture("Status", row.transform, ProceduralArt.Icon(complete ? "check" : "pending"),
                 complete ? Theme.Success : Theme.TextMuted);

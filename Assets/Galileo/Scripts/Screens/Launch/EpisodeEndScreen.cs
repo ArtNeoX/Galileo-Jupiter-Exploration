@@ -5,9 +5,11 @@ using UnityEngine.UI;
 
 namespace Galileo.Screens
 {
-    /// <summary>The screen slowly darkens over the launch, then "КОНЕЦ 1 ЭПИЗОДА" fades in.</summary>
+    /// <summary>The screen slowly darkens over the launch, then "END OF EPISODE 1" fades in and episode 2 starts.</summary>
     public class EpisodeEndScreen : ScreenBase
     {
+        public override bool AllowLanguageToggle => false;
+
         Image _black;
         Text _label;
 
@@ -27,6 +29,9 @@ namespace Galileo.Screens
             yield return FadeGraphic(_black, 1f, 3f);
             yield return new WaitForSecondsRealtime(0.5f);
             yield return FadeGraphic(_label, 1f, 1.8f);
+            yield return new WaitForSecondsRealtime(2.2f);
+            yield return FadeGraphic(_label, 0f, 1f);
+            App.StartEpisode2();
         }
 
         static IEnumerator FadeGraphic(Graphic g, float to, float duration)

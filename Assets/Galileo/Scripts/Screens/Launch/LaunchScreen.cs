@@ -33,6 +33,8 @@ namespace Galileo.Screens
         bool _stopped;
         TimeSpan _utcStart;
 
+        public override bool AllowLanguageToggle => false; // timed mini-game
+
         protected override void Build()
         {
             _data = Content.launch;
@@ -170,18 +172,19 @@ namespace Galileo.Screens
         {
             yield return new WaitForSecondsRealtime(0.7f);
             var stage = App.Stage;
+            int attempt = App.LaunchIndex;
             switch (_attempt.outcome)
             {
                 case "engineFailure":
                     stage.ShowEngineFailure();
                     yield return new WaitForSecondsRealtime(1.4f);
-                    App.ShowDialog(App.SpeakerOrRandom(_attempt.speakerId), _attempt.lines, App.NextLaunchAttempt, true);
+                    App.ShowDialog(App.SpeakerOrRandom(_attempt.speakerId), c => c.launch.attempts[attempt].lines, App.NextLaunchAttempt, true);
                     break;
 
                 case "badWeather":
                     stage.SetBadWeather();
                     yield return new WaitForSecondsRealtime(2.2f);
-                    App.ShowDialog(App.SpeakerOrRandom(_attempt.speakerId), _attempt.lines, App.NextLaunchAttempt, true);
+                    App.ShowDialog(App.SpeakerOrRandom(_attempt.speakerId), c => c.launch.attempts[attempt].lines, App.NextLaunchAttempt, true);
                     break;
 
                 default: // success
@@ -189,7 +192,7 @@ namespace Galileo.Screens
                     {
                         stage.Ignite();
                         yield return new WaitForSecondsRealtime(2.2f);
-                        App.ShowDialog(App.SpeakerOrRandom(_data.successSpeakerId), _data.successLines, App.ShowEpisodeEnd, true);
+                        App.ShowDialog(App.SpeakerOrRandom(_data.successSpeakerId), c => c.launch.successLines, App.ShowEpisodeEnd, true);
                     }
                     else
                     {

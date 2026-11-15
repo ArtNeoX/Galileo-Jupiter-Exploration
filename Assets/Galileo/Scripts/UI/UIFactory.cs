@@ -136,7 +136,11 @@ namespace Galileo.UI
             btn.colors = colors;
             Label("Label", img.transform, label, 30, Theme.ButtonText, TextAnchor.MiddleCenter, FontStyle.Bold)
                 .rectTransform.Stretch();
-            btn.onClick.AddListener(() => onClick?.Invoke());
+            btn.onClick.AddListener(() =>
+            {
+                GameAudio.Click();
+                onClick?.Invoke();
+            });
             return btn;
         }
 
@@ -200,7 +204,11 @@ namespace Galileo.UI
                 .rectTransform.Stretch(28, 10, 76, 10);
             Picture("Arrow", img.transform, ProceduralArt.Icon("play"), Theme.Accent).rectTransform
                 .Pin(new Vector2(1f, 0.5f), new Vector2(30, 30), new Vector2(-28, 0));
-            btn.onClick.AddListener(() => onClick?.Invoke());
+            btn.onClick.AddListener(() =>
+            {
+                GameAudio.Click();
+                onClick?.Invoke();
+            });
             return btn;
         }
     }

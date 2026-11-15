@@ -9,6 +9,8 @@ namespace Galileo.Screens
     /// </summary>
     public class OptionScreen : ScreenBase
     {
+        public override bool ShowBudget => true;
+
         protected override void Build()
         {
             var system = App.CurrentSystem;

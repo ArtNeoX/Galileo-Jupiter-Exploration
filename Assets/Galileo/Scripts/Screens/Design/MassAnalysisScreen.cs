@@ -15,6 +15,9 @@ namespace Galileo.Screens
     {
         static readonly CultureInfo Russian = new CultureInfo("ru-RU");
 
+        /// <summary>Decimal comma in Russian and Kazakh, point in English.</summary>
+        CultureInfo Numbers => App.IsEnglish ? CultureInfo.InvariantCulture : Russian;
+
         AnalysisData _data;
         DesignOptionInfo[] _options;
         InputField[] _fields;
@@ -41,12 +44,13 @@ namespace Galileo.Screens
             var info = UIFactory.Button("Info", panel, Ui.info.ToUpperInvariant(), () => ShowInfo(true));
             info.GetComponent<RectTransform>().Pin(new Vector2(1, 1), new Vector2(170, 60), new Vector2(-40, -40));
 
-            string volume = _data.volume.ToString("0.###", Russian);
-            for (int i = 0; i < count; i++)
-                BuildSample(panel, i, i == 0 ? -400f : 400f, volume, done);
-
+            // Created before the samples: on a revisit the samples are filled in (and report their status) while building.
             _status = UIFactory.Label("Status", panel, "", 28, Theme.Success, TextAnchor.MiddleCenter, FontStyle.Bold);
             _status.rectTransform.Anchor(new Vector2(0, 0), new Vector2(1, 0), new Vector2(100, 130), new Vector2(-100, 190));
+
+            string volume = _data.volume.ToString("0.###", Numbers);
+            for (int i = 0; i < count; i++)
+                BuildSample(panel, i, i == 0 ? -400f : 400f, volume, done);
 
             var back = UIFactory.Button("Return", panel, Ui.returnLabel.ToUpperInvariant(), () => App.ShowSystem(system));
             back.GetComponent<RectTransform>().Pin(new Vector2(0.5f, 0f), new Vector2(320, 70), new Vector2(0, 40));
@@ -92,7 +96,7 @@ namespace Galileo.Screens
 
             if (done)
             {
-                field.text = Exact(index).ToString("0.###", Russian);
+                field.text = Exact(index).ToString("0.###", Numbers);
                 MarkCorrect(index);
             }
             else

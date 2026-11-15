@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using Galileo.Content;
 using Galileo.Screens;
 using Galileo.UI;
@@ -5,28 +7,35 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem.UI;
 using UnityEngine.UI;
+using Random = UnityEngine.Random;
 
 namespace Galileo
 {
     /// <summary>
     /// Entry point. Builds the canvas and background, then runs the screens in order:
-    /// Scene 1 (characters) → 2 (objectives) → 2.1 (dialog) → 3 (mission concept) → 4 (orbiter design)
-    /// → atmospheric probe dialog → gravity assist → launch (3 attempts) → end of episode 1.
+    /// Menu → "October 1st 1977" → Scene 1 (characters) → 2 (objectives) → 2.1 (dialog) → 3 (mission concept)
+    /// → "Orbiter probe" → 4 (orbiter design) → garage assembly → "Atmospheric probe" → atmospheric probe dialog
+    /// → gravity assist → launch (3 attempts) → end of episode 1
+    /// → episode 2: antenna failure → separation → descent mini-game → successful mission / game over → menu.
     /// </summary>
     [DisallowMultipleComponent]
     public class GalileoApp : MonoBehaviour
     {
-        [Tooltip("Path of the content JSON inside a Resources folder, without the extension.")]
+        [Tooltip("Path of the Russian content JSON inside a Resources folder, without the extension. " +
+                 "The other languages sit next to it as <path>_en and <path>_kk.")]
         [SerializeField] string contentPath = "Galileo/content";
 
         [Tooltip("Render in Resources/Galileo/Backgrounds shown until a mission concept is selected.")]
         [SerializeField] string defaultBackground = "render_conceptB";
 
-        public GalileoContent Content { get; private set; }
-        public ConceptInfo SelectedConcept { get; set; }
+        public const string MenuBackground = "bg_menu";
+        public const string GarageBackground = "garage";
 
-        RectTransform _screens, _stageLayer;
+        public GalileoContent Content { get; private set; }
+
+        RectTransform _screens, _stageLayer, _overlay;
         ScreenBase _current;
+        Action _rebuild;
 
         /// <summary>
         /// Starts the game even when Play is pressed in a scene that has no GalileoApp (e.g. SampleScene).
@@ -40,30 +49,124 @@ namespace Galileo
 
         void Awake()
         {
-            Content = ContentLoader.Load(contentPath);
+            LoadContent();
             EnsureEventSystem();
+            GameAudio.Init(this);
             BuildCanvas();
         }
 
-        void Start() => ShowCharacters();
+        void Start() => ShowMenu();
+
+        // ---------- Languages: ENG (default) → KZ → RU ----------
+
+        static readonly string[] LanguageLabels = { "ENG", "KZ", "RU" };
+        static readonly string[] LanguageSuffixes = { "_en", "_kk", "" };
+        int _language;
+
+        public bool IsEnglish => _language == 0;
+        Text _languageLabel;
+        Button _languageButton;
+
+        void LoadContent()
+        {
+            var path = contentPath + LanguageSuffixes[_language];
+            Content = Resources.Load<TextAsset>(path) != null ? ContentLoader.Load(path) : ContentLoader.Load(contentPath);
+        }
+
+        public void NextLanguage()
+        {
+            _language = (_language + 1) % LanguageLabels.Length;
+            LoadContent();
+            _languageLabel.text = LanguageLabels[_language];
+            _budget.SetLabel(Content.ui.budgetLabel);
+            if (_current != null && _current.AllowLanguageToggle) _rebuild?.Invoke();
+        }
+
+        // ---------- Menu and game state ----------
+
+        public void ShowMenu()
+        {
+            SetBackground(MenuBackground);
+            SetBackgroundDim(false);
+            Show<MenuScreen>();
+        }
+
+        public void StartGame()
+        {
+            ResetState();
+            ShowIntro(new IntroRequest
+            {
+                text = c => c.menu.introDate,
+                hold = 2f,
+                onBlack = () =>
+                {
+                    SetBackground(defaultBackground, 0f);
+                    SetBackgroundDim(true, 0f);
+                },
+                onDone = ShowCharacters
+            });
+        }
+
+        public void ReturnToMenu()
+        {
+            ResetState();
+            GameAudio.StopLoop();
+            ShowMenu();
+        }
+
+        public void Restart() => ReturnToMenu();
+
+        void ResetState()
+        {
+            _conceptIndex = -1;
+            CompletedSystems.Clear();
+            AnalysedSystems.Clear();
+            MatchingPlacement.Clear();
+            GaragePlaced.Clear();
+            _optionOrder.Clear();
+            ApproachShown = false;
+            if (Stage != null) Destroy(Stage.gameObject);
+            Stage = null;
+            Budget = StartBudget;
+            _budget.SetAmount(Budget);
+        }
 
         public void ShowCharacters() => Show<CharacterIntroScreen>();
         public void ShowObjectives() => Show<ObjectivesScreen>();
         public void ShowConcepts() => Show<ConceptsScreen>();
         public void ShowEnd() => Show<EndScreen>();
 
-        public void Restart()
+        // ---------- Title cards ----------
+
+        public IntroRequest PendingIntro { get; private set; }
+
+        public void ShowIntro(IntroRequest request)
         {
-            SelectedConcept = null;
-            CompletedSystems.Clear();
-            AnalysedSystems.Clear();
-            MatchingPlacement.Clear();
-            _optionOrder.Clear();
-            SetBackground(defaultBackground);
-            SetBackgroundDim(true);
-            if (Stage != null) Destroy(Stage.gameObject);
-            Stage = null;
-            ShowCharacters();
+            PendingIntro = request;
+            Show<IntroScreen>();
+        }
+
+        // ---------- Economy (decorative) ----------
+
+        public long Budget { get; private set; }
+
+        /// <summary>The design systems' costs add up to the starting budget, so it ends at exactly $0.</summary>
+        public long StartBudget
+        {
+            get
+            {
+                long sum = 0;
+                foreach (var s in Content.orbiterDesign.systems) sum += s.cost;
+                return sum;
+            }
+        }
+
+        public void Spend(long amount)
+        {
+            if (amount == 0) return;
+            Budget -= amount;
+            _budget.Spend(amount, Budget);
+            GameAudio.Play("purchase");
         }
 
         // ---------- Dialogs (Scene 2.1 and the wrong-concept explanation) ----------
@@ -71,8 +174,9 @@ namespace Galileo
         /// <summary>The dialog the next <see cref="DialogScreen"/> plays.</summary>
         public DialogRequest PendingDialog { get; private set; }
 
-        public void ShowDialog(string speakerId, string[] lines, System.Action onFinished, bool portraitLeft = false,
-            string speakerName = null)
+        /// <summary>Lines and name are read from the current content, so switching language re-reads them.</summary>
+        public void ShowDialog(string speakerId, Func<GalileoContent, string[]> lines, Action onFinished,
+            bool portraitLeft = false, Func<GalileoContent, string> speakerName = null)
         {
             PendingDialog = new DialogRequest
             {
@@ -82,6 +186,11 @@ namespace Galileo
             Show<DialogScreen>();
         }
 
+        public void ShowDialog(string speakerId, string[] lines, Action onFinished, bool portraitLeft = false,
+            string speakerName = null) =>
+            ShowDialog(speakerId, _ => lines, onFinished, portraitLeft,
+                speakerName == null ? null : (Func<GalileoContent, string>)(_ => speakerName));
+
         /// <summary>The given character id, or a random team member when it's empty.</summary>
         public string SpeakerOrRandom(string speakerId)
         {
@@ -90,7 +199,19 @@ namespace Galileo
         }
 
         public void ShowMissionDialog() =>
-            ShowDialog(Content.missionDialog.speakerId, Content.missionDialog.lines, ShowConcepts);
+            ShowDialog(Content.missionDialog.speakerId, c => c.missionDialog.lines, ShowConcepts);
+
+        int _conceptIndex = -1;
+
+        public ConceptInfo SelectedConcept
+        {
+            get
+            {
+                var items = Content.concepts.items;
+                return _conceptIndex >= 0 && _conceptIndex < items.Length ? items[_conceptIndex] : null;
+            }
+            set => _conceptIndex = value == null ? -1 : Array.IndexOf(Content.concepts.items, value);
+        }
 
         /// <summary>Scene 3 → Next. Only the correct concept moves on; otherwise a random team member explains why not.</summary>
         public void ConfirmConcept(ConceptInfo concept)
@@ -98,38 +219,51 @@ namespace Galileo
             SelectedConcept = concept;
             if (concept.correct)
             {
-                ShowOrbiterDesign();
+                ShowIntro(new IntroRequest { text = c => c.ui.orbiterProbeIntro, hold = 1.4f, onDone = ShowOrbiterDesign });
                 return;
             }
             var people = Content.characters;
             var speaker = people.Length > 0 ? people[Random.Range(0, people.Length)].id : null;
-            var lines = concept.wrongChoiceLines != null && concept.wrongChoiceLines.Length > 0
-                ? concept.wrongChoiceLines
-                : new[] { Content.ui.explanationPlaceholder };
-            ShowDialog(speaker, lines, ShowConcepts);
+            int index = _conceptIndex;
+            ShowDialog(speaker, c =>
+            {
+                var lines = index >= 0 && index < c.concepts.items.Length ? c.concepts.items[index].wrongChoiceLines : null;
+                return lines != null && lines.Length > 0 ? lines : new[] { c.ui.explanationPlaceholder };
+            }, ShowConcepts);
         }
 
         // ---------- Scene 4: Orbiter probe design ----------
 
-        public readonly System.Collections.Generic.HashSet<string> CompletedSystems =
-            new System.Collections.Generic.HashSet<string>();
-        public DesignSystemInfo CurrentSystem { get; private set; }
-        public DesignOptionInfo CurrentOption { get; private set; }
+        public readonly HashSet<string> CompletedSystems = new HashSet<string>();
 
-        readonly System.Collections.Generic.Dictionary<string, DesignOptionInfo[]> _optionOrder =
-            new System.Collections.Generic.Dictionary<string, DesignOptionInfo[]>();
+        string _systemId;
+        int _optionIndex;
+
+        public DesignSystemInfo CurrentSystem => Content.FindSystem(_systemId);
+
+        public DesignOptionInfo CurrentOption
+        {
+            get
+            {
+                var system = CurrentSystem;
+                return system != null && _optionIndex >= 0 && _optionIndex < system.options.Length ? system.options[_optionIndex] : null;
+            }
+        }
+
+        /// <summary>Per system: the display order of its options, as indices (kept for the whole game).</summary>
+        readonly Dictionary<string, int[]> _optionOrder = new Dictionary<string, int[]>();
 
         public void ShowOrbiterDesign() => Show<SystemsListScreen>();
 
         public void ShowSystem(DesignSystemInfo system)
         {
-            CurrentSystem = system;
+            _systemId = system.id;
             Show<SystemScreen>();
         }
 
         public void ShowOption(DesignOptionInfo option)
         {
-            CurrentOption = option;
+            _optionIndex = Array.IndexOf(CurrentSystem.options, option);
             Show<OptionScreen>();
         }
 
@@ -138,12 +272,10 @@ namespace Galileo
         // ---------- Scene 4 analyses (the ANALYSIS button on a system screen) ----------
 
         /// <summary>Systems whose analysis the player has completed.</summary>
-        public readonly System.Collections.Generic.HashSet<string> AnalysedSystems =
-            new System.Collections.Generic.HashSet<string>();
+        public readonly HashSet<string> AnalysedSystems = new HashSet<string>();
 
         /// <summary>Pros/cons matching: where each card currently is, per system (kept while the player reads the options).</summary>
-        public readonly System.Collections.Generic.Dictionary<string, int[]> MatchingPlacement =
-            new System.Collections.Generic.Dictionary<string, int[]>();
+        public readonly Dictionary<string, int[]> MatchingPlacement = new Dictionary<string, int[]>();
 
         public static bool HasAnalysis(DesignSystemInfo system) =>
             system.analysis != null && !string.IsNullOrEmpty(system.analysis.type);
@@ -161,7 +293,9 @@ namespace Galileo
                 case "mass": Show<MassAnalysisScreen>(); break;
                 case "matching": Show<MatchingAnalysisScreen>(); break;
                 default: // engineer
-                    ShowDialog(analysis.speakerId, analysis.lines, () => CompleteAnalysis(), false, analysis.speakerName);
+                    var id = system.id;
+                    ShowDialog(analysis.speakerId, c => c.FindSystem(id)?.analysis.lines, CompleteAnalysis, false,
+                        c => c.FindSystem(id)?.analysis.speakerName);
                     break;
             }
         }
@@ -169,13 +303,13 @@ namespace Galileo
         /// <summary>Marks the current system's analysis done and returns to its screen.</summary>
         public void CompleteAnalysis()
         {
-            AnalysedSystems.Add(CurrentSystem.id);
+            AnalysedSystems.Add(_systemId);
             ShowSystem(CurrentSystem);
         }
 
-        public void MarkAnalysed() => AnalysedSystems.Add(CurrentSystem.id);
+        public void MarkAnalysed() => AnalysedSystems.Add(_systemId);
 
-        /// <summary>Dev shortcut L: skips the orbiter design, sets the right launch window, or hits the green zone.</summary>
+        /// <summary>Dev shortcut L: skips the current mini-game.</summary>
         void Update()
         {
             var k = UnityEngine.InputSystem.Keyboard.current;
@@ -184,6 +318,10 @@ namespace Galileo
                 _current is OptionScreen || _current is TestScreen ||
                 _current is MassAnalysisScreen || _current is MatchingAnalysisScreen)
                 SkipOrbiterDesign();
+            else if (_current is GarageScreen garage)
+                garage.DevPlaceAll();
+            else if (_current is DescentScreen descent)
+                descent.DevCollectAll();
             else if (_current is GravityAssistScreen gravity)
                 gravity.SetWindow(gravity.CorrectStartDay, gravity.CorrectEndDay);
             // LaunchScreen handles L itself (stops the pointer in the green zone).
@@ -192,28 +330,69 @@ namespace Galileo
         public void SkipOrbiterDesign()
         {
             foreach (var system in Content.orbiterDesign.systems)
-                CompletedSystems.Add(system.id);
-            ShowAtmosProbeDialog();
+                if (CompletedSystems.Add(system.id)) Spend(system.cost);
+            ShowGarage();
         }
 
         public void CompleteCurrentSystem()
         {
-            CompletedSystems.Add(CurrentSystem.id);
+            var system = CurrentSystem;
+            if (CompletedSystems.Add(system.id)) Spend(system.cost);
             ShowOrbiterDesign();
+        }
+
+        // ---------- Garage: orbiter assembly ----------
+
+        /// <summary>Ids of the garage parts already attached to the orbiter.</summary>
+        public readonly HashSet<string> GaragePlaced = new HashSet<string>();
+
+        /// <summary>True when an optional part (the low-gain antenna) was attached in the garage.</summary>
+        public bool HasLowGainAntenna
+        {
+            get
+            {
+                foreach (var e in Content.garage.elements)
+                    if (e.optional && GaragePlaced.Contains(e.id)) return true;
+                return false;
+            }
+        }
+
+        public void ShowGarage()
+        {
+            SetBackground(GarageBackground);
+            SetBackgroundDim(false);
+            Show<GarageScreen>();
+        }
+
+        /// <summary>Garage → "Atmospheric probe" → the atmospheric probe dialog.</summary>
+        public void FinishGarage()
+        {
+            ShowIntro(new IntroRequest
+            {
+                text = c => c.ui.atmosProbeIntro,
+                hold = 1.4f,
+                onBlack = () =>
+                {
+                    var dialog = Content.atmosProbeDialog;
+                    SetBackground(string.IsNullOrEmpty(dialog.background) ? "render_conceptC_Atmos_probe" : dialog.background, 0f);
+                    SetBackgroundDim(dialog.dim, 0f);
+                },
+                onDone = ShowAtmosProbeDialog
+            });
         }
 
         // ---------- Scene 5: Atmospheric probe ----------
 
         /// <summary>
-        /// Orbiter design done → a random team member introduces the atmospheric probe while the
-        /// background fades to the atmospheric probe render.
+        /// A random team member introduces the atmospheric probe while the background fades to the
+        /// atmospheric probe render.
         /// </summary>
         public void ShowAtmosProbeDialog()
         {
             var dialog = Content.atmosProbeDialog;
             SetBackground(string.IsNullOrEmpty(dialog.background) ? "render_conceptC_Atmos_probe" : dialog.background);
             SetBackgroundDim(dialog.dim);
-            ShowDialog(SpeakerOrRandom(dialog.speakerId), dialog.lines, ShowGravityAssist, dialog.portraitLeft);
+            ShowDialog(SpeakerOrRandom(dialog.speakerId), c => c.atmosProbeDialog.lines, ShowGravityAssist, dialog.portraitLeft);
         }
 
         // ---------- Gravity assist and launch ----------
@@ -247,15 +426,77 @@ namespace Galileo
 
         public void ShowEpisodeEnd() => Show<EpisodeEndScreen>();
 
+        // ---------- Episode 2 ----------
+
+        /// <summary>The approach title has played once (a language switch shows the buttons straight away).</summary>
+        public bool ApproachShown { get; set; }
+
+        /// <summary>Called on a black screen at the end of episode 1.</summary>
+        public void StartEpisode2()
+        {
+            if (Stage != null) Destroy(Stage.gameObject);
+            Stage = null;
+            SetBackground("jupiter_distanced", 0f);
+            SetBackgroundDim(false, 0f);
+            GameAudio.PlayLoop("ambience_ep2");
+            Show<ApproachScreen>();
+        }
+
+        public void ShowSeparation()
+        {
+            SetBackground("jupiter_close");
+            SetBackgroundDim(false);
+            Show<SeparationScreen>();
+        }
+
+        public void ShowDescent() => Show<DescentScreen>();
+
+        public void GameOver()
+        {
+            ShowIntro(new IntroRequest
+            {
+                text = c => c.episode2.gameOver,
+                hold = 2.4f,
+                textColor = Theme.Failure,
+                onBlack = () =>
+                {
+                    GameAudio.StopLoop();
+                    SetBackground(MenuBackground, 0f);
+                    SetBackgroundDim(false, 0f);
+                },
+                onDone = ReturnToMenu
+            });
+        }
+
+        public void MissionSuccess()
+        {
+            GameAudio.Play("success");
+            ShowIntro(new IntroRequest
+            {
+                text = c => c.episode2.successText,
+                hold = 0.6f,
+                waitForInput = true,
+                textColor = Theme.Success,
+                onBlack = () =>
+                {
+                    SetBackground(MenuBackground, 0f);
+                    SetBackgroundDim(false, 0f);
+                },
+                onDone = ReturnToMenu
+            });
+        }
+
         /// <summary>
         /// The two options in a randomly shuffled order (so the right answer isn't always "A"),
         /// kept the same for the rest of the session so retries don't reshuffle.
         /// </summary>
         public DesignOptionInfo[] OptionsInOrder(DesignSystemInfo system)
         {
-            if (!_optionOrder.TryGetValue(system.id, out var order))
+            system = Content.FindSystem(system.id) ?? system;
+            if (!_optionOrder.TryGetValue(system.id, out var order) || order.Length != system.options.Length)
             {
-                order = (DesignOptionInfo[])system.options.Clone();
+                order = new int[system.options.Length];
+                for (int i = 0; i < order.Length; i++) order[i] = i;
                 for (int i = order.Length - 1; i > 0; i--)
                 {
                     int j = Random.Range(0, i + 1);
@@ -263,19 +504,35 @@ namespace Galileo
                 }
                 _optionOrder[system.id] = order;
             }
-            return order;
+            var result = new DesignOptionInfo[order.Length];
+            for (int i = 0; i < order.Length; i++) result[i] = system.options[order[i]];
+            return result;
         }
 
-        void Show<T>() where T : ScreenBase
+        // ---------- Screens ----------
+
+        void Show<T>() where T : ScreenBase => Show<T>(false);
+
+        void Show<T>(bool instant) where T : ScreenBase
         {
+            _rebuild = () => Show<T>(true);
             if (_current != null) Destroy(_current.gameObject);
             var rt = UIFactory.Rect(typeof(T).Name, _screens).Stretch();
             var fade = rt.gameObject.AddComponent<CanvasGroup>();
-            fade.alpha = 0f;
-            _current = rt.gameObject.AddComponent<T>();
-            _current.Init(this);
-            if (_current != null && _current.gameObject == rt.gameObject)
-                _current.StartCoroutine(FadeIn(fade));
+            fade.alpha = instant ? 1f : 0f;
+            var screen = rt.gameObject.AddComponent<T>();
+            _current = screen;
+            screen.Init(this);
+            if (_current != screen) return; // Build already moved on to another screen
+            UpdateOverlay();
+            if (!_current.FadesIn) fade.alpha = 1f;
+            else if (!instant) _current.StartCoroutine(FadeIn(fade));
+        }
+
+        void UpdateOverlay()
+        {
+            _languageButton.gameObject.SetActive(_current.AllowLanguageToggle);
+            _budget.SetVisible(_current.ShowBudget);
         }
 
         static System.Collections.IEnumerator FadeIn(CanvasGroup group)
@@ -288,6 +545,8 @@ namespace Galileo
             }
             group.alpha = 1f;
         }
+
+        BudgetHud _budget;
 
         void BuildCanvas()
         {
@@ -315,10 +574,21 @@ namespace Galileo
             _backgroundDim = UIFactory.Line(bgRoot, Theme.BackgroundDim);
             _backgroundDim.rectTransform.Stretch();
             _backgroundDim.enabled = false;
-            SetBackground(defaultBackground, 0f);
+            SetBackground(MenuBackground, 0f);
 
             _stageLayer = UIFactory.Rect("Stage", root).Stretch();
             _screens = UIFactory.Rect("Screens", root).Stretch();
+
+            // Always on top: language switch and budget in the top-right corner.
+            _overlay = UIFactory.Rect("Overlay", root).Stretch();
+            _languageButton = UIFactory.Button("Language", _overlay, LanguageLabels[_language], NextLanguage);
+            _languageButton.GetComponent<RectTransform>().Pin(new Vector2(1, 1), new Vector2(92, 42), new Vector2(-24, -12));
+            _languageLabel = _languageButton.transform.Find("Label").GetComponent<Text>();
+            _languageLabel.fontSize = 22;
+            _budget = BudgetHud.Create(_overlay);
+            _budget.SetLabel(Content.ui.budgetLabel);
+            Budget = StartBudget;
+            _budget.SetAmount(Budget);
         }
 
         // ---------- Background ----------

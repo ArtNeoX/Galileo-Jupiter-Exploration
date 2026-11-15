@@ -23,6 +23,15 @@ namespace Galileo.Screens
 
         protected abstract void Build();
 
+        /// <summary>Shows the language button; switching rebuilds this screen in the new language.</summary>
+        public virtual bool AllowLanguageToggle => true;
+
+        /// <summary>Shows the budget in the top-right corner.</summary>
+        public virtual bool ShowBudget => false;
+
+        /// <summary>False for screens that handle their own fade (title cards).</summary>
+        public virtual bool FadesIn => true;
+
         /// <summary>Space / Enter / Right arrow, for advancing without the mouse.</summary>
         protected static bool AdvancePressed()
         {

@@ -19,6 +19,9 @@ namespace Galileo.Content
         public GravityAssistData gravityAssist = new GravityAssistData();
         public LaunchData launch = new LaunchData();
         public string episodeEndText = "КОНЕЦ 1 ЭПИЗОДА";
+        public MenuData menu = new MenuData();
+        public GarageData garage = new GarageData();
+        public Episode2Data episode2 = new Episode2Data();
 
         public CharacterProfile FindCharacter(string id)
         {
@@ -26,6 +29,85 @@ namespace Galileo.Content
                 if (c != null && c.id == id) return c;
             return null;
         }
+
+        public DesignSystemInfo FindSystem(string id)
+        {
+            foreach (var s in orbiterDesign.systems)
+                if (s != null && s.id == id) return s;
+            return null;
+        }
+    }
+
+    /// <summary>Main menu and the opening date card.</summary>
+    [Serializable]
+    public class MenuData
+    {
+        public string title = "Galileo";
+        public string subtitle = "Jupiter Exploration";
+        public string play = "PLAY";
+        public string quit = "QUIT";
+        public string introDate = "OCTOBER 1ST 1977";
+    }
+
+    /// <summary>
+    /// Orbiter assembly in the garage. Every bitmap lives in Resources/Galileo/Garage/ and is painted on the same
+    /// canvas (same size), so laying them all over each other shows the finished probe.
+    /// </summary>
+    [Serializable]
+    public class GarageData
+    {
+        public string title = "ORBITER ASSEMBLY";
+        public string hint = "Drag each part onto its place on the silhouette.";
+        public string infoTitle = "PART INFO";
+        public string infoPlaceholder = "Hover over a part to see what it does.";
+        public string checklistTitle = "CHECKLIST";
+        public string completeMessage = "All essential systems are attached.";
+        public string outlineFile = "outline";
+        public string structureFile = "main_structure";
+        /// <summary>Placeholder rectangle of the main structure until its bitmap exists (centre x, y; size w, h; 0..1, y up).</summary>
+        public float structureX = 0.5f, structureY = 0.52f, structureW = 0.16f, structureH = 0.36f;
+        /// <summary>Character id for the "do we need it?" question; empty picks a random team member.</summary>
+        public string optionalSpeakerId = "";
+        public string[] optionalLines = { "Are you sure we need it? It costs additional money." };
+        public string attachAnyway = "ATTACH ANYWAY";
+        public string leaveIt = "LEAVE IT";
+        public GarageElement[] elements = Array.Empty<GarageElement>();
+    }
+
+    [Serializable]
+    public class GarageElement
+    {
+        public string id;
+        /// <summary>Bitmap name in Resources/Galileo/Garage/ (defaults to the id).</summary>
+        public string file;
+        public string name;
+        public string info;
+        /// <summary>Not on the checklist; attaching it asks first and costs <see cref="cost"/>.</summary>
+        public bool optional;
+        public long cost;
+        /// <summary>Placeholder rectangle until the bitmap exists (centre x, y; size w, h; 0..1 of the canvas, y up).</summary>
+        public float x = 0.5f, y = 0.5f, w = 0.1f, h = 0.1f;
+    }
+
+    /// <summary>Episode 2: arrival at Jupiter, the probe release and the descent mini-game.</summary>
+    [Serializable]
+    public class Episode2Data
+    {
+        public string approachText = "150 DAYS UNTIL THE JUPITER APPROACH\nMAIN ANTENNA HAS FAILED";
+        public string switchAntenna = "SWITCH TO LOW-GAIN ANTENNA";
+        public string abortMission = "ABORT MISSION";
+        public string noAntennaNote = "There is no low-gain antenna on board.";
+        public string gameOver = "GAME OVER";
+        public string separationHint = "Galileo has reached Jupiter. Release the atmospheric probe.";
+        public string separate = "SEPARATE";
+        public string collectHint = "Catch the gas samples before they disappear!";
+        public string collectedFormat = "SAMPLES {0} / {1}";
+        public string sendData = "SEND DATA";
+        public string successText = "SUCCESSFUL MISSION";
+        public string[] gases = { "H₂", "He", "CH₄", "NH₃", "H₂O", "H₂S", "C₂H₆", "C₂H₂" };
+        public int sampleCount = 20;
+        public float timeLimit = 60f;
+        public float sampleSeconds = 1f;
     }
 
     [Serializable]
@@ -72,6 +154,11 @@ namespace Galileo.Content
         public string check = "Проверить";
         public string analysisRequired = "Сначала выполните анализ";
         public string analysisDone = "Анализ выполнен";
+
+        // Intros and economy
+        public string orbiterProbeIntro = "ORBITER PROBE";
+        public string atmosProbeIntro = "ATMOSPHERIC PROBE";
+        public string budgetLabel = "BUDGET";
     }
 
     [Serializable]
@@ -151,11 +238,29 @@ namespace Galileo.Content
     public class DialogRequest
     {
         public string speakerId;
-        public string[] lines;
+        /// <summary>Reads the lines from the current content, so a language switch re-reads them.</summary>
+        public Func<GalileoContent, string[]> lines;
         public bool portraitLeft;
         /// <summary>Overrides the character's name (for speakers who aren't team members).</summary>
-        public string speakerName;
+        public Func<GalileoContent, string> speakerName;
         public Action onFinished;
+        /// <summary>Line being shown; kept so a language switch resumes on the same line.</summary>
+        public int index;
+    }
+
+    /// <summary>Runtime-only: a full-screen title card (black, text in the centre).</summary>
+    public class IntroRequest
+    {
+        public Func<GalileoContent, string> text;
+        public float hold = 1.6f;
+        /// <summary>Runs once the screen is fully black (swap the background here).</summary>
+        public Action onBlack;
+        public Action onDone;
+        /// <summary>Wait for a click / key before continuing.</summary>
+        public bool waitForInput;
+        /// <summary>The screen is already black (coming from another black screen).</summary>
+        public bool startBlack;
+        public Color textColor = new Color(0.95f, 0.89f, 0.78f);
     }
 
     /// <summary>Gravity assist scene: pick the launch window on a heliocentric map.</summary>
@@ -244,6 +349,8 @@ namespace Galileo.Content
         public string problem;
         public string task;
         public string finalDecision;
+        /// <summary>Taken from the budget when this system passes its test (decorative economy).</summary>
+        public long cost;
         /// <summary>Characters on the left and right of the system screen; each presents one option.</summary>
         public string[] speakers = Array.Empty<string>();
         public DesignOptionInfo[] options = Array.Empty<DesignOptionInfo>();

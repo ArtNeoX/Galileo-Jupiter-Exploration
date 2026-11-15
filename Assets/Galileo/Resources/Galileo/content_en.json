@@ -1,0 +1,615 @@
+{
+  "ui": {
+    "next": "Next",
+    "clickToContinue": "Click anywhere to continue",
+    "viewedFormat": "Objectives studied: {0} of {1}",
+    "selectedFormat": "Selected: {0}",
+    "nothingSelected": "Selected: —",
+    "prosLabel": "Advantages",
+    "consLabel": "Limitations",
+    "educationLabel": "Education",
+    "specializationLabel": "Specialization",
+    "teamRoleLabel": "Role in the team",
+    "teamTitle": "Meet the team",
+    "teamSubtitle": "You arrive at the laboratory where the future mission to Jupiter is being discussed. Your task is to help the team prepare the concept of the scientific mission.",
+    "endTitle": "To be continued",
+    "endBody": "The next scenes will be added later.",
+    "chosenFormat": "Your choice: {0}",
+    "restart": "Main menu",
+    "analysis": "Analysis",
+    "info": "Info",
+    "returnLabel": "Return",
+    "check": "Check",
+    "analysisRequired": "Complete the analysis first",
+    "analysisDone": "Analysis complete",
+    "orbiterProbeIntro": "ORBITER PROBE",
+    "atmosProbeIntro": "ATMOSPHERIC PROBE",
+    "budgetLabel": "Budget",
+    "back": "Back",
+    "test": "Test",
+    "tryAgain": "Try again",
+    "testInProgress": "Test in progress",
+    "standBy": "Please stand by",
+    "successfulTest": "Successful test",
+    "unsuccessfulTest": "Test failed",
+    "problemLabel": "Engineering problem",
+    "behaviorLabel": "Behaviour in the space environment",
+    "whyChosenLabel": "Why it was chosen for Galileo",
+    "whyNotChosenLabel": "Why it was not chosen for Galileo",
+    "recommendationLabel": "Engineering team recommendation",
+    "finalDecisionLabel": "Final decision",
+    "designedFormat": "Systems designed: {0} of {1}",
+    "explanationPlaceholder": "[Explanation will be added later]"
+  },
+  "characters": [
+    {
+      "id": "casani",
+      "name": "John R. Casani",
+      "role": "Galileo Project Manager",
+      "bio": "Casani was appointed project manager in 1977, after serving as mission manager for Voyager. He was responsible for the overall management of Galileo: coordinating the engineering and science teams, planning resources, controlling the budget and schedule, and working with NASA leadership on the continuation and funding of the project. He was involved from early planning through spacecraft assembly and faced repeated attempts to cancel the mission.",
+      "education": "BSc in Electrical Engineering, University of Pennsylvania, 1955.",
+      "specialization": "systems engineering and management of large space projects.",
+      "teamRole": "kept the science goals, engineering decisions, budget and schedule consistent with each other."
+    },
+    {
+      "id": "johnson",
+      "name": "Torrence V. Johnson",
+      "role": "Mission Project Scientist",
+      "bio": "Johnson served as Galileo Project Scientist from 1977 until the end of the mission. He was responsible for the science programme: formulating the research goals, defining the observations needed and making sure the science instruments matched the goals of the mission. His scientific speciality included the moons of the outer planets, the geology of icy and rocky bodies, and the analysis of spacecraft data. He also took part in the science work of the Voyager missions.",
+      "education": "PhD in Planetary Science, California Institute of Technology (Caltech), 1970.",
+      "specialization": "planetary science, the moons of the outer planets, interpretation of space mission data.",
+      "teamRole": "decided what scientific data Galileo had to collect and which observations the instrument design and mission planning had to support."
+    },
+    {
+      "id": "spehalski",
+      "name": "Richard J. Spehalski",
+      "role": "Engineer and later Project Manager",
+      "bio": "Spehalski joined the Jet Propulsion Laboratory (JPL) in 1959 as a mechanical engineer. During his career he held engineering and management positions on the Galileo and Voyager programmes. In February 1988 he succeeded Casani as Galileo Project Manager and stayed in that role until 1990.",
+      "education": "BSc in Mechanical Engineering, Cornell University, 1958.",
+      "specialization": "spacecraft mechanical systems, engineering management and integration of complex projects.",
+      "teamRole": "worked on the engineering development of Galileo and later led the whole project through launch preparation and the start of the flight."
+    }
+  ],
+  "objectives": {
+    "title": "Mission objectives",
+    "subtitle": "The team gathers around the table. The scientific questions that shape the main goal of the mission appear on the screen.",
+    "hint": "Hover over each objective to learn more",
+    "items": [
+      {
+        "number": "01",
+        "title": "Atmosphere",
+        "info": "What is Jupiter's atmosphere made of and how is it structured?",
+        "icon": "atmosphere"
+      },
+      {
+        "number": "02",
+        "title": "Magnetosphere",
+        "info": "What are the properties of the planet's magnetic field and radiation environment?",
+        "icon": "magnetosphere"
+      },
+      {
+        "number": "03",
+        "title": "Moons",
+        "info": "How do Jupiter's moons differ and what processes take place on their surfaces?",
+        "icon": "moons"
+      },
+      {
+        "number": "04",
+        "title": "Atmospheric probe",
+        "info": "Can the atmosphere be measured directly with a separate probe?",
+        "icon": "probe"
+      }
+    ]
+  },
+  "missionDialog": {
+    "speakerId": "casani",
+    "lines": [
+      "The goal of the mission is a comprehensive study of Jupiter: its atmosphere, magnetosphere and moons.",
+      "In addition, we will directly measure the composition and properties of the atmosphere with a separate atmospheric probe."
+    ]
+  },
+  "concepts": {
+    "title": "Mission concept",
+    "subtitle": "During the discussion the team identifies three main concepts.",
+    "hint": "Hover over an option to study it. Click to select it.",
+    "items": [
+      {
+        "letter": "A",
+        "title": "Flyby spacecraft",
+        "subtitle": "Jupiter flyby",
+        "info": "A flyby spacecraft travels to Jupiter, makes observations during its close approach to the planet and its moons, and then continues on a heliocentric trajectory. It does not perform a manoeuvre to enter a permanent orbit around Jupiter.",
+        "pros": "the architecture is potentially simpler, and not having to enter Jupiter orbit removes the demanding capture manoeuvre.",
+        "cons": "short observation windows and fewer chances to study the same regions again. If an important measurement fails during the flyby, it may be impossible to repeat it.",
+        "icon": "flyby",
+        "correct": false,
+        "wrongChoiceLines": [
+          "[Explanation will be added later]"
+        ],
+        "background": "render_conceptA"
+      },
+      {
+        "letter": "B",
+        "title": "Orbiter",
+        "subtitle": "Jupiter orbiter",
+        "info": "The spacecraft travels to Jupiter and performs a braking manoeuvre so that the planet's gravity captures it into orbit. Instead of one short encounter it carries out a long science programme, completing a series of orbits and flying close to Jupiter's moons.",
+        "pros": "the ability to make repeated observations, compare changes over time and study different moons within one mission.",
+        "cons": "higher demands on navigation, propellant and spacecraft reliability. An error in the capture manoeuvre could leave the spacecraft outside its planned orbit.",
+        "icon": "orbiter",
+        "correct": false,
+        "wrongChoiceLines": [
+          "[Explanation will be added later]"
+        ],
+        "background": "render_conceptB"
+      },
+      {
+        "letter": "C",
+        "title": "Orbiter with an atmospheric probe",
+        "subtitle": "Orbiter + atmospheric probe",
+        "info": "This architecture combines two complementary parts: an orbiter (Galileo Orbiter) for long-term study of the Jupiter system and a separate probe (Galileo Atmospheric Probe) that enters the planet's atmosphere directly. The orbiter and the probe have different tasks and different sets of science instruments.",
+        "pros": "the mission gets two kinds of scientific data. The probe measures the atmosphere directly during its descent, while the orbiter provides long-term observations and studies of the moons. The two methods complement each other.",
+        "cons": "the architecture is more complex and heavier than a single orbiter. Two trajectories have to be coordinated, and the probe must separate and transmit its data within a limited time. The probe does not replace the orbiter: it only carries out its own limited measurement programme during the descent.",
+        "icon": "orbiter_probe",
+        "correct": true,
+        "background": "render_conceptC"
+      }
+    ]
+  },
+  "orbiterDesign": {
+    "title": "Spacecraft design",
+    "subtitle": "Orbiter Probe · Operating conditions for the Galileo Orbiter",
+    "hint": "Select a system to design it",
+    "systems": [
+      {
+        "id": "radiation",
+        "title": "Radiation Protection System",
+        "subtitle": "Radiation protection system",
+        "problem": "Jupiter has a powerful magnetosphere that traps high-energy charged particles. While passing through the radiation belts, Galileo is exposed to electrons and protons that can cause ionisation effects, build-up of electric charge and degradation of semiconductor components.",
+        "task": "Choose the material and design that will protect the most sensitive on-board electronics.",
+        "finalDecision": "Aluminium Radiation Vault",
+        "speakers": [
+          "spehalski",
+          "johnson"
+        ],
+        "options": [
+          {
+            "name": "Aluminium Radiation Vault",
+            "icon": "vault",
+            "correct": true,
+            "behavior": "Aluminium has a density of ρ = 2700 kg/m³ and good structural properties. When thick enough, it weakens the flux of charged particles reaching the electronic components. As a result, the accumulated dose of ionising radiation inside the protected compartment is reduced.",
+            "pros": "• Relatively low mass compared with denser metals.\n• The shield can be built into the spacecraft structure.\n• Easy to manufacture and mechanically strong.",
+            "cons": "Aluminium shielding does not remove the radiation load completely. When high-energy particles interact with the material, secondary particles can be produced. The shield thickness therefore has to be calculated together with the radiation hardness of the electronics.",
+            "why": "Galileo really did use a special Radiation Vault with aluminium shielding. It protected the most sensitive electronic systems without excessively increasing the mass of the whole spacecraft.",
+            "resultTitle": "Radiation Shielding: Successful Test",
+            "result": "The aluminium shielding structure shows suitable characteristics for reducing radiation effects on the electronic components of the Galileo Orbiter. Aluminium combines a relatively low density with good structural properties. With the right thickness and geometry it weakens the effect of charged particles while keeping the growth of the spacecraft's mass limited.",
+            "recommendation": "",
+            "density": 2700,
+            "sample": "sample_aluminium"
+          },
+          {
+            "name": "Tantalum Radiation Shielding",
+            "icon": "dense_shield",
+            "correct": false,
+            "behavior": "Tantalum is a metal with a density of ρ = 16650 kg/m³ and a high atomic number. It can effectively weaken certain components of ionising radiation. However, when high-energy particles interact with heavy nuclei, secondary radiation may be produced.",
+            "pros": "• High material density.\n• Can be used for local shielding of individual sensitive parts.\n• Good thermal and chemical stability.",
+            "cons": "The high density of tantalum makes the structure much heavier. Moreover, a high atomic mass does not guarantee universally better radiation protection: the result depends on the energy and type of particles, the shield geometry and the production of secondary radiation.",
+            "why": "Using tantalum as the main shielding material would have required an extra mass budget and a separate analysis of radiation effects. The aluminium Radiation Vault was the more rational design for protecting Galileo's electronics.",
+            "resultTitle": "Radiation Shielding: Insufficient Mass Efficiency",
+            "result": "Tantalum shielding shows a strong ability to weaken some components of ionising radiation thanks to the material's high density and atomic number. However, using tantalum as the main protection for the whole spacecraft greatly increases the mass of the structure. In addition, high-energy particles interacting with high-atomic-number materials can produce secondary radiation.",
+            "recommendation": "Consider aluminium radiation shielding. Tantalum should be evaluated only for individual local elements, taking into account the particle energy spectrum and the results of radiation modelling.",
+            "density": 16650,
+            "sample": "sample_tantalum"
+          }
+        ],
+        "analysis": {
+          "type": "mass",
+          "required": true,
+          "title": "Materials analysis",
+          "hint": "Calculate the mass of an equal-volume sample of each material. The material densities are listed under “Info”.",
+          "successMessage": "Correct: for the same volume, tantalum is six times heavier than aluminium.",
+          "errorMessage": "Wrong — check your calculation: m = ρ · V",
+          "volume": 0.1,
+          "volumeFormat": "V = {0} m³",
+          "massLabel": "m =",
+          "massUnit": "kg",
+          "tolerance": 0.005,
+          "infoTitle": "Material comparison"
+        },
+        "cost": 240000000
+      },
+      {
+        "id": "thermal",
+        "title": "Thermal Control System",
+        "subtitle": "Thermal control system",
+        "problem": "At Jupiter's distance the solar flux is about 3.7% of its value at Earth's orbit. At the same time, the spacecraft must keep its electronics, science instruments and propulsion system at a stable temperature.",
+        "task": "Choose the main approach to passive thermal control.",
+        "finalDecision": "Multilayer Insulation",
+        "speakers": [
+          "johnson",
+          "spehalski"
+        ],
+        "options": [
+          {
+            "name": "Multilayer Insulation (MLI)",
+            "icon": "layers",
+            "correct": true,
+            "behavior": "MLI is a multilayer thermal insulation system made of thin reflective layers and spacer materials. It reduces heat transfer by thermal radiation between the spacecraft surface and its surroundings.",
+            "pros": "• Low mass compared with many other insulation designs.\n• Reduces heat transfer by thermal radiation.\n• Lessens the influence of external temperatures on the internal components.\n• Needs no electrical power to perform its main insulating function.\n• Can be combined with heaters, radiators and other thermal control systems.\n• Suits long interplanetary missions because the insulation itself has no moving parts.",
+            "cons": "• Does not produce heat and cannot make up for a lack of it by itself.\n• Does not remove excess heat from equipment effectively.\n• Its performance depends on installation quality, the number of layers and the vacuum environment.\n• Compressed layers or thermal bridges degrade its insulating properties.\n• Extra equipment may be needed to hold the set temperature: heaters, thermal louvres and radiators.",
+            "why": "Galileo used multilayer insulation together with thermal louvres and electric heaters. This combination kept the spacecraft's temperature under control throughout the long interplanetary cruise and the orbital mission.",
+            "resultTitle": "Thermal Control: Successful Test",
+            "result": "Multilayer insulation proves effective at limiting heat exchange between the spacecraft and its environment. The layers of reflective material reduce heat transfer by thermal radiation, helping keep the equipment at a stable temperature during a long stay in space. However, MLI does not fully regulate temperature on its own: to keep operating conditions it must be used together with other thermal control elements.",
+            "recommendation": "",
+            "detailText": "MLI is a passive thermal control system made of several thin layers of reflective material separated by low-conductivity spacers. Its main function is to reduce heat exchange by thermal radiation, which limits the loss of the spacecraft's internal heat and lessens the influence of the external thermal environment. Its advantages include relatively low mass, no need for electrical power to insulate, no moving parts and easy integration with other thermal control equipment. However, MLI does not produce heat and does not actively remove excess heat from equipment. Its effectiveness also depends on correct installation of the layers: compressing them too much, damaging them or leaving thermal bridges can increase unwanted heat transfer. That is why the system is usually used together with electric heaters, radiators and thermal louvres."
+          },
+          {
+            "name": "Active Liquid Cooling System",
+            "icon": "coolant",
+            "correct": false,
+            "behavior": "A liquid thermal control system uses a coolant that circulates through pipes, carrying heat between the spacecraft components and radiators.",
+            "pros": "• Moves heat efficiently between distant components of the spacecraft.\n• Allows central control of the temperature of different compartments.\n• Suits spacecraft with a high internal heat load.\n• Sends excess heat to radiators to be rejected into space.\n• Gives more flexible control of heat distribution than passive insulation alone.",
+            "cons": "• Increases the mass and structural complexity of the spacecraft.\n• Requires pumps, pipes, heat exchangers and a control system.\n• The pumps consume electrical power.\n• A coolant leak can disrupt the system.\n• Pumps and other mechanical parts add potential points of failure.\n• Needs extra monitoring of leak-tightness and reliability throughout the mission.",
+            "why": "For Galileo's relatively moderate heat load, a full active liquid system would have added mass and complexity without enough engineering benefit. Passive insulation combined with local heaters and louvres was the more suitable solution.",
+            "resultTitle": "Thermal Control: Increased System Complexity",
+            "result": "A liquid cooling system can carry heat between individual spacecraft components by circulating a coolant. However, it requires pumps, pipes and extra control elements. This increases the system's mass, power consumption and number of potential points of failure. In addition, a separate radiator system would be needed to reject the heat into space.",
+            "recommendation": "Consider passive multilayer insulation combined with thermal louvres and electric heaters. This configuration provides the necessary thermal control with less structural complexity.",
+            "detailText": "An Active Liquid Cooling System uses a circulating coolant to carry thermal energy between spacecraft components. A pump moves the liquid through a network of pipes connected to heat exchangers and radiators, where excess heat is rejected. Its advantages include efficient heat transport over long distances, the ability to cool several components at once, flexible distribution of thermal energy and more precise temperature control of individual parts. However, the design needs extra components, including pumps, pipes, heat exchangers and control equipment, which increase the overall mass and complexity of the spacecraft. The pumps also need electrical power, and moving parts and a sealed loop add potential points of failure. A damaged pipe or a broken seal can let the coolant leak and reduce the system's effectiveness."
+          }
+        ],
+        "analysis": {
+          "type": "matching",
+          "required": true,
+          "title": "Thermal control systems analysis",
+          "hint": "Drag each card into the advantages (+) or disadvantages (−) column of the right system. Hover over a card to read it in full.",
+          "successMessage": "All the advantages and disadvantages are sorted correctly!",
+          "errorMessage": "There are mistakes — the wrong cards went back down."
+        },
+        "cost": 160000000
+      },
+      {
+        "id": "structural",
+        "title": "Structural System",
+        "subtitle": "Spacecraft load-bearing structure",
+        "problem": "Galileo must stay mechanically intact through launch, the interplanetary cruise and long operation in the Jupiter system. The load-bearing structure must withstand vibration and dynamic loads, hold the science instruments securely and keep the components geometrically stable. Galileo is also special because it has spinning and stabilised parts (spun and despun sections), so the structural materials must meet not only strength requirements but also requirements for balancing, mass distribution and precise placement of equipment.",
+        "task": "Choose the structural material for the main load-bearing frame.",
+        "finalDecision": "Aluminium Alloy Structural System",
+        "speakers": [
+          "spehalski",
+          "casani"
+        ],
+        "options": [
+          {
+            "name": "Aluminium Alloy Structural Panels",
+            "icon": "panels",
+            "correct": true,
+            "behavior": "Aerospace aluminium alloys have a relatively low density, good mechanical strength and are easy to manufacture. In panel and frame structures they provide the necessary stiffness with limited mass. In vacuum, aluminium keeps its main mechanical properties. Thermal expansion of the material and compatibility of joints with other structural elements must still be taken into account.",
+            "pros": "• High strength-to-mass ratio for a number of aerospace alloys.\n• Easy to machine; complex structural parts can be made.\n• Predictable mechanical behaviour.\n• Can be integrated with insulation and shielding elements.",
+            "cons": "Aluminium has a relatively high coefficient of thermal expansion. With large temperature gradients this can cause deformation and extra stress in the joints. The structure therefore needs a proper thermal analysis.",
+            "why": "Aluminium structures are a rational choice for the load-bearing elements of a spacecraft of this class. They keep the structural mass down while providing the necessary stiffness and mechanical reliability. For Galileo this option gives a balanced combination of mass, strength and technological readiness.",
+            "resultTitle": "Structural Integrity: Successful Test",
+            "result": "The aluminium-alloy structure shows a suitable strength-to-mass ratio for the main body of the Galileo Orbiter. Aluminium alloys have sufficient mechanical strength, a relatively low density and are easy to manufacture. This makes it possible to build load-bearing panels and structural elements that can withstand launch loads and later operation. The design must take into account the thermal expansion of the material and possible deformation under mechanical loads.",
+            "recommendation": ""
+          },
+          {
+            "name": "Titanium Alloy Primary Frame",
+            "icon": "truss",
+            "correct": false,
+            "behavior": "Titanium alloys, in particular Ti-6Al-4V, have a high specific strength, good corrosion resistance and keep their mechanical properties over a wide temperature range. They can be used in highly loaded structural elements of spacecraft.",
+            "pros": "• High strength.\n• Good corrosion resistance.\n• Relatively low coefficient of thermal expansion compared with aluminium.\n• Suitable for loaded mounts and joints.",
+            "cons": "The density of titanium is about 4.43 g/cm³, while aluminium's is about 2.70 g/cm³. So for the same volume a titanium structure is considerably heavier. In addition, machining and manufacturing large titanium parts requires more complex processes.",
+            "why": "Titanium is a fully fledged aerospace structural material, but using it for the whole load-bearing structure would have increased the mass budget. For Galileo, where the spacecraft's mass is directly tied to launch and cruise capabilities, this option gives no real advantage over aluminium structures. Titanium is better used locally — in individual mounts and highly loaded joints.",
+            "resultTitle": "Structural Integrity: Excessive Structural Mass",
+            "result": "The titanium alloy shows high mechanical strength, corrosion resistance and a relatively low coefficient of thermal expansion. However, titanium is much denser than aluminium alloys. Using titanium for the whole main load-bearing structure increases the spacecraft's mass and may require extra launch-vehicle capability. Despite its excellent mechanical properties, this option gives no advantage large enough to justify the extra mass.",
+            "recommendation": "Consider aluminium alloys for the main structure. Titanium is best used locally, for example for individual fasteners and joints with high mechanical loads."
+          }
+        ],
+        "analysis": {
+          "type": "engineer",
+          "required": false,
+          "speakerId": "engineer_angry",
+          "speakerName": "Engineer",
+          "lines": [
+            "The test will be carried out without you."
+          ]
+        },
+        "cost": 380000000
+      },
+      {
+        "id": "power",
+        "title": "Power Generation System",
+        "subtitle": "Power supply system",
+        "problem": "Galileo must continuously power its science instruments, on-board computer, communications, attitude control and thermal control. At about 5.2 astronomical units from the Sun, sunlight is only about 3.7% as intense as at Earth's orbit. The choice of power source must therefore consider not only its efficiency but also its ability to work autonomously for a long time.",
+        "task": "Choose the main electrical power generation system.",
+        "finalDecision": "Two Radioisotope Thermoelectric Generators (RTGs)",
+        "speakers": [
+          "casani",
+          "johnson"
+        ],
+        "options": [
+          {
+            "name": "Radioisotope Thermoelectric Generator (RTG)",
+            "icon": "rtg",
+            "correct": true,
+            "behavior": "An RTG converts the heat released by the radioactive decay of plutonium-238 into electricity through the thermoelectric effect. Unlike solar panels, the generator does not depend on the intensity of sunlight and can produce electricity steadily over a long period of operation.",
+            "pros": "• Independent of lighting and orientation towards the Sun.\n• Long autonomous power supply.\n• No moving mechanical parts in the energy conversion.\n• Also gives off heat, which can be used in the spacecraft's thermal design.",
+            "cons": "The electrical output of an RTG slowly decreases because of the radioactive decay of the heat source and the degradation of the thermoelectric converters. In addition, radioisotope sources require special safety, protection and monitoring during manufacture, transport and launch.",
+            "why": "Galileo really did use two radioisotope thermoelectric generators. They powered the spacecraft throughout the interplanetary cruise and the orbital mission. This kept the science and engineering systems working despite the much weaker sunlight in the Jupiter system.",
+            "resultTitle": "Power Generation: Successful Test",
+            "result": "Radioisotope thermoelectric generators produce electricity steadily regardless of the intensity of sunlight. The system converts the heat released by the radioactive decay of plutonium-238 into electricity. This keeps the science instruments, on-board computers and communications working throughout a long mission in a remote part of the Solar System. The electrical output slowly decreases as the isotope decays.",
+            "recommendation": ""
+          },
+          {
+            "name": "High-Efficiency Solar Array System",
+            "icon": "solar",
+            "correct": false,
+            "behavior": "Photovoltaic panels convert sunlight into electricity using semiconductor solar cells. Their output depends on the intensity of the incoming light, the panel area, the efficiency of the cells and the angle of the sunlight.",
+            "pros": "• Converts solar energy without consuming radioisotope fuel.\n• Power can be increased by enlarging the panel area.\n• Relatively simple to integrate with battery systems.\n• No radioisotope power source needed.",
+            "cons": "At Jupiter's distance sunlight is about 27 times weaker than at Earth. To get comparable power, the panel area must be greatly increased. This adds mass, size and demands on the deployment mechanisms. Another factor is Jupiter's radiation environment, which can gradually reduce the efficiency of the solar cells.",
+            "why": "Although photovoltaic technology was promising, the solar panels available when Galileo was designed could not provide the combination of power, mass and reliability this mission needed. RTGs avoided the need to deploy enormous solar panels and gave a more predictable power supply.",
+            "resultTitle": "Power Generation: Insufficient Power at Jupiter",
+            "result": "Solar panels show limited efficiency in Jupiter orbit. At about 5.2 astronomical units from the Sun, sunlight is roughly 3.7% as intense as at Earth's orbit. To get comparable power, the panel area would have to be greatly increased. That would make the spacecraft heavier, complicate the deployment mechanisms and raise structural requirements. A further risk is the effect of Jupiter's intense radiation environment on the solar cells.",
+            "recommendation": "Consider radioisotope thermoelectric generators. For Galileo they are the more suitable solution for long operation in the Jupiter system."
+          }
+        ],
+        "analysis": {
+          "type": "engineer",
+          "required": false,
+          "speakerId": "engineer_angry",
+          "speakerName": "Engineer",
+          "lines": [
+            "The test will be carried out without you. You're not wearing any radiation protection gear!"
+          ]
+        },
+        "cost": 420000000
+      }
+    ]
+  },
+  "atmosProbeDialog": {
+    "speakerId": "johnson",
+    "background": "render_conceptC_Atmos_probe",
+    "dim": false,
+    "portraitLeft": true,
+    "lines": [
+      "Our concept is to develop an autonomous probe with a heat shield and a parachute system. After a high-speed entry into the atmosphere, the probe slows down, opens its parachute and gradually descends through the cloud layers, taking scientific measurements.",
+      "The parachute greatly extends the time available for measurements compared with free fall. The probe can study the layers of the atmosphere one after another, transmitting data during its descent.",
+      "The parachute and its deployment system add mass and complexity. Besides, the probe cannot control where it drifts and gradually sinks into regions of higher temperature and pressure.",
+      "This will be the first descent of its kind into Jupiter's atmosphere. For the first time we will directly measure its chemical composition, temperature, pressure and wind speed at different depths, and study the cloud layers and atmospheric processes of the gas giant."
+    ]
+  },
+  "gravityAssist": {
+    "title": "Gravity assist",
+    "subtitle": "A gravity assist is a way of changing a spacecraft's speed and direction using the gravitational interaction with a planet during a close flyby. With a correctly calculated trajectory, the spacecraft can increase or decrease its speed relative to the Sun while using almost none of its own propellant for the main acceleration.\n\nVEEGA — Venus-Earth-Earth Gravity Assist.",
+    "hint": "Move the markers on the scale below to set the start and end of Galileo's launch window. The planets are shown in their real positions on the window's start date.",
+    "rangeStart": "1989-10-01",
+    "rangeEnd": "1989-12-31",
+    "windowStart": "1989-10-12",
+    "windowEnd": "1989-11-21",
+    "colorRangeDays": 30,
+    "positionsFormat": "Planet positions on {0}",
+    "sun": "Sun",
+    "venus": "Venus",
+    "earth": "Earth",
+    "jupiter": "Jupiter",
+    "monthsShort": [
+      "JAN",
+      "FEB",
+      "MAR",
+      "APR",
+      "MAY",
+      "JUN",
+      "JUL",
+      "AUG",
+      "SEP",
+      "OCT",
+      "NOV",
+      "DEC"
+    ],
+    "startLabel": "Window opens",
+    "endLabel": "Window closes"
+  },
+  "launch": {
+    "windowFormat": "Launch window: {0} min ({1}–{2} UTC)",
+    "utcLabel": "UTC",
+    "hint": "Press SPACE or click when the pointer is in the green zone",
+    "perfect": "Perfect!",
+    "good": "Almost",
+    "miss": "Miss",
+    "retry": "The launch did not happen — try again",
+    "windowClosed": "The launch window has closed — try again",
+    "windowMinutesPerSecond": 1.0,
+    "pointerSpeed": 0.45,
+    "greenZone": 0.07,
+    "yellowZone": 0.3,
+    "crossX": 0.5,
+    "crossY": 0.42,
+    "successSpeakerId": "",
+    "successLines": [
+      "Successful!"
+    ],
+    "attempts": [
+      {
+        "date": "12 October 1989",
+        "windowMinutes": 10,
+        "utcStart": "17:29",
+        "utcEnd": "17:39",
+        "outcome": "engineFailure",
+        "speakerId": "",
+        "lines": [
+          "The Galileo launch has been scrubbed because of a faulty controller on main engine No. 2 of the shuttle Atlantis. During pre-launch checks the system returned incorrect data, and the engineers could not guarantee it would work reliably.",
+          "We have decided to replace the controller, because the safety of the crew and the spacecraft remains our top priority. The launch is moved to 17 October 1989."
+        ]
+      },
+      {
+        "date": "17 October 1989",
+        "windowMinutes": 27,
+        "utcStart": "17:21",
+        "utcEnd": "17:48",
+        "outcome": "badWeather",
+        "speakerId": "",
+        "lines": [
+          "Because of bad weather — heavy clouds and poor visibility that ruled out a safe emergency landing of Atlantis if the mission had to be aborted — the launch is moved to 18 October 1989."
+        ]
+      },
+      {
+        "date": "18 October 1989",
+        "windowMinutes": 29,
+        "utcStart": "16:40",
+        "utcEnd": "17:09",
+        "outcome": "success",
+        "speakerId": "",
+        "lines": []
+      }
+    ]
+  },
+  "episodeEndText": "END OF EPISODE 1",
+  "menu": {
+    "title": "Galileo",
+    "subtitle": "Jupiter Exploration",
+    "play": "Play",
+    "quit": "Quit",
+    "introDate": "OCTOBER 1ST 1977"
+  },
+  "garage": {
+    "title": "Orbiter assembly",
+    "hint": "Drag each part onto its place on the silhouette.",
+    "infoTitle": "Part info",
+    "infoPlaceholder": "Hover over a part to see what it does.",
+    "checklistTitle": "Checklist",
+    "completeMessage": "All essential systems are attached.",
+    "optionalLines": [
+      "Are you sure we need it? It costs additional money."
+    ],
+    "attachAnyway": "Attach anyway",
+    "leaveIt": "Leave it",
+    "outlineFile": "outline",
+    "structureFile": "main_structure",
+    "structureX": 0.5,
+    "structureY": 0.52,
+    "structureW": 0.16,
+    "structureH": 0.36,
+    "optionalSpeakerId": "",
+    "elements": [
+      {
+        "id": "high_gain_antenna",
+        "file": "high_gain_antenna",
+        "name": "High-gain antenna",
+        "info": "A 4.8 m umbrella-like antenna that unfolds in space. The main communication channel: it sends science data to Earth at a high rate.",
+        "optional": false,
+        "cost": 0,
+        "x": 0.5,
+        "y": 0.8,
+        "w": 0.34,
+        "h": 0.2
+      },
+      {
+        "id": "rtg_1",
+        "file": "rtg_1",
+        "name": "RTG #1",
+        "info": "Radioisotope thermoelectric generator powered by plutonium-238. Mounted on a boom away from the science instruments.",
+        "optional": false,
+        "cost": 0,
+        "x": 0.27,
+        "y": 0.48,
+        "w": 0.2,
+        "h": 0.06
+      },
+      {
+        "id": "rtg_2",
+        "file": "rtg_2",
+        "name": "RTG #2",
+        "info": "The second generator. Together the two RTGs produced about 570 W of electrical power at launch.",
+        "optional": false,
+        "cost": 0,
+        "x": 0.73,
+        "y": 0.48,
+        "w": 0.2,
+        "h": 0.06
+      },
+      {
+        "id": "magnetometer_boom",
+        "file": "magnetometer_boom",
+        "name": "Magnetometer boom",
+        "info": "An 11 m boom that carries the magnetometer sensors away from the spacecraft's own magnetic field.",
+        "optional": false,
+        "cost": 0,
+        "x": 0.8,
+        "y": 0.62,
+        "w": 0.3,
+        "h": 0.03
+      },
+      {
+        "id": "plasma_wave_antenna",
+        "file": "plasma_wave_antenna",
+        "name": "Plasma wave antenna",
+        "info": "Detects the electric fields of plasma waves in Jupiter's magnetosphere.",
+        "optional": false,
+        "cost": 0,
+        "x": 0.22,
+        "y": 0.66,
+        "w": 0.22,
+        "h": 0.02
+      },
+      {
+        "id": "scan_platform",
+        "file": "scan_platform",
+        "name": "Scan platform",
+        "info": "A stabilised platform with the camera and spectrometers (SSI, NIMS, UVS, PPR) that points the instruments at their targets.",
+        "optional": false,
+        "cost": 0,
+        "x": 0.42,
+        "y": 0.22,
+        "w": 0.12,
+        "h": 0.12
+      },
+      {
+        "id": "propulsion_module",
+        "file": "propulsion_module",
+        "name": "Retro-propulsion module",
+        "info": "A 400 N main engine and small thrusters for Jupiter orbit insertion and trajectory corrections.",
+        "optional": false,
+        "cost": 0,
+        "x": 0.57,
+        "y": 0.25,
+        "w": 0.1,
+        "h": 0.1
+      },
+      {
+        "id": "low_gain_antenna",
+        "file": "low_gain_antenna",
+        "name": "Low-gain antenna",
+        "info": "A small omnidirectional antenna. It sends data far more slowly than the main antenna, but it doesn't need to be pointed precisely at Earth.",
+        "optional": true,
+        "cost": 35000000,
+        "x": 0.5,
+        "y": 0.935,
+        "w": 0.04,
+        "h": 0.07
+      }
+    ]
+  },
+  "episode2": {
+    "approachText": "150 DAYS UNTIL THE JUPITER APPROACH\nMAIN ANTENNA HAS FAILED",
+    "switchAntenna": "SWITCH TO LOW-GAIN ANTENNA",
+    "abortMission": "ABORT MISSION",
+    "noAntennaNote": "There is no low-gain antenna on board.",
+    "gameOver": "GAME OVER",
+    "separationHint": "Galileo has reached Jupiter. Release the atmospheric probe.",
+    "separate": "SEPARATE",
+    "collectHint": "Catch the gas samples before they disappear!",
+    "collectedFormat": "SAMPLES {0} / {1}",
+    "sendData": "SEND DATA",
+    "successText": "SUCCESSFUL MISSION",
+    "gases": [
+      "H₂",
+      "He",
+      "CH₄",
+      "NH₃",
+      "H₂O",
+      "H₂S",
+      "C₂H₆",
+      "C₂H₂"
+    ],
+    "sampleCount": 20,
+    "timeLimit": 60.0,
+    "sampleSeconds": 1.0
+  }
+}
