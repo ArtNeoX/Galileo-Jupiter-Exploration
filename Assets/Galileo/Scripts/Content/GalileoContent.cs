@@ -91,6 +91,8 @@ namespace Galileo.Content
         /// <summary>Where the part lies in the garage before it is attached: centre on the garage picture (0..1, y up).
         /// Negative = pick a free spot at random.</summary>
         public float homeX = -1f, homeY = -1f;
+        /// <summary>Hidden once the main structure appears (the structure bitmap already shows this part).</summary>
+        public bool hideWhenComplete;
     }
 
     /// <summary>Episode 2: arrival at Jupiter, the probe release and the descent mini-game.</summary>
@@ -206,6 +208,10 @@ namespace Galileo.Content
         /// <summary>Character id. Leave empty to pick a random team member.</summary>
         public string speakerId;
         public string[] lines = Array.Empty<string>();
+        /// <summary>Optional second character who answers after <see cref="lines"/>: then the first speaker stands
+        /// on the left and this one on the right.</summary>
+        public string replySpeakerId;
+        public string[] replyLines = Array.Empty<string>();
         /// <summary>Optional render in Resources/Galileo/Backgrounds the background fades to when this dialog opens.</summary>
         public string background;
         /// <summary>Darken the background render behind this dialog (off lets the render's details show).</summary>
@@ -392,7 +398,7 @@ namespace Galileo.Content
 
         // mass
         /// <summary>Sample volume in m³.</summary>
-        public float volume = 0.1f;
+        public float volume = 0.05f;
         public string volumeFormat = "V = {0} м³";
         public string massLabel = "m =";
         public string massUnit = "кг";

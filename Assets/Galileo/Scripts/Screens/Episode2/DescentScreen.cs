@@ -206,8 +206,7 @@ namespace Galileo.Screens
                 if (clear) break;
             }
 
-            var color = GasColor(gas);
-            var disc = UIFactory.Picture("Sample " + gas, Root, ProceduralArt.Icon("disc"), new Color(color.r, color.g, color.b, 0.92f));
+            var disc = UIFactory.Picture("Sample " + gas, Root, ProceduralArt.Icon("disc"), new Color(1f, 1f, 1f, 0.92f));
             disc.raycastTarget = true;
             var rt = disc.rectTransform;
             rt.Pin(new Vector2(0.5f, 0.5f), new Vector2(SampleSize, SampleSize), pos);
@@ -277,22 +276,6 @@ namespace Galileo.Screens
                 yield return null;
             }
             Destroy(rt.gameObject);
-        }
-
-        static Color GasColor(string gas)
-        {
-            switch (gas)
-            {
-                case "H₂": return new Color(0.62f, 0.82f, 1f);
-                case "He": return new Color(1f, 0.86f, 0.45f);
-                case "CH₄": return new Color(0.55f, 0.9f, 0.62f);
-                case "NH₃": return new Color(0.85f, 0.7f, 1f);
-                case "H₂O": return new Color(0.45f, 0.7f, 1f);
-                case "H₂S": return new Color(0.95f, 0.95f, 0.5f);
-                case "C₂H₆": return new Color(1f, 0.65f, 0.5f);
-                case "C₂H₂": return new Color(1f, 0.55f, 0.75f);
-                default: return Theme.AccentBright;
-            }
         }
 
         // ---------- End ----------

@@ -209,8 +209,16 @@ namespace Galileo
             return Content.characters[Random.Range(0, Content.characters.Length)].id;
         }
 
-        public void ShowMissionDialog() =>
-            ShowDialog(Content.missionDialog.speakerId, c => c.missionDialog.lines, ShowConcepts);
+        /// <summary>The mission brief: the first speaker on the left, then the one who replies on the right.</summary>
+        public void ShowMissionDialog()
+        {
+            var d = Content.missionDialog;
+            bool reply = d.replyLines != null && d.replyLines.Length > 0;
+            ShowDialog(d.speakerId, c => c.missionDialog.lines, reply ? ShowMissionReply : (Action)ShowConcepts, reply);
+        }
+
+        void ShowMissionReply() =>
+            ShowDialog(Content.missionDialog.replySpeakerId, c => c.missionDialog.replyLines, ShowConcepts, false, null, true);
 
         int _conceptIndex = -1;
 
@@ -240,7 +248,7 @@ namespace Galileo
             {
                 var lines = index >= 0 && index < c.concepts.items.Length ? c.concepts.items[index].wrongChoiceLines : null;
                 return lines != null && lines.Length > 0 ? lines : new[] { c.ui.explanationPlaceholder };
-            }, ShowConcepts);
+            }, ShowConcepts, true);
         }
 
         // ---------- Scene 4: Orbiter probe design ----------

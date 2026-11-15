@@ -107,7 +107,10 @@
   "missionDialog": {
     "speakerId": "casani",
     "lines": [
-      "The goal of the mission is a comprehensive study of Jupiter: its atmosphere, magnetosphere and moons.",
+      "The goal of the mission is a comprehensive study of Jupiter: its atmosphere, magnetosphere and moons."
+    ],
+    "replySpeakerId": "johnson",
+    "replyLines": [
       "In addition, we will directly measure the composition and properties of the atmosphere with a separate atmospheric probe."
     ]
   },
@@ -126,7 +129,8 @@
         "icon": "flyby",
         "correct": false,
         "wrongChoiceLines": [
-          "[Explanation will be added later]"
+          "A flyby would give us only a few days near Jupiter. Our goal is a long study of the atmosphere, the magnetosphere and the moons, with repeated observations.",
+          "And during a flyby the atmosphere can't be measured directly: everything is seen only from a distance. This option doesn't meet the mission's goals."
         ],
         "background": "render_conceptA"
       },
@@ -140,7 +144,8 @@
         "icon": "orbiter",
         "correct": false,
         "wrongChoiceLines": [
-          "[Explanation will be added later]"
+          "An orbiter alone is well suited to a long study of Jupiter and its moons.",
+          "But from orbit the atmosphere can only be observed remotely. To measure its composition, temperature and pressure directly, we need a separate probe that descends into it."
         ],
         "background": "render_conceptB"
       },
@@ -210,7 +215,7 @@
           "hint": "Calculate the mass of an equal-volume sample of each material. The material densities are listed under “Info”.",
           "successMessage": "Correct: for the same volume, tantalum is six times heavier than aluminium.",
           "errorMessage": "Wrong — check your calculation: m = ρ · V",
-          "volume": 0.1,
+          "volume": 0.05,
           "volumeFormat": "V = {0} m³",
           "massLabel": "m =",
           "massUnit": "kg",
@@ -566,7 +571,8 @@
         "w": 0.32,
         "h": 0.3,
         "homeX": 0.193,
-        "homeY": 0.611
+        "homeY": 0.611,
+        "hideWhenComplete": true
       },
       {
         "id": "lowgain_antenna",
@@ -585,7 +591,7 @@
     ]
   },
   "episode2": {
-    "approachText": "150 DAYS UNTIL THE JUPITER APPROACH\nMAIN ANTENNA HAS FAILED",
+    "approachText": "APRIL 11, 1991\nMAIN ANTENNA HAS FAILED",
     "switchAntenna": "SWITCH TO LOW-GAIN ANTENNA",
     "abortMission": "ABORT MISSION",
     "noAntennaNote": "There is no low-gain antenna on board.",

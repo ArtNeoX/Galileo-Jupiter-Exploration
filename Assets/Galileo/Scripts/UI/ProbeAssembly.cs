@@ -221,7 +221,7 @@ namespace Galileo.UI
             Structure(data, frame);
             foreach (var e in data.elements)
             {
-                if (!attached.Contains(e.id)) continue;
+                if (!attached.Contains(e.id) || e.hideWhenComplete) continue; // the structure already shows it
                 var part = Part(e);
                 var img = PartImage(part, frame, e.id);
                 Place(img.rectTransform, part.area, frame.rect.size);

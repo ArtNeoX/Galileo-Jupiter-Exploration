@@ -86,6 +86,7 @@ namespace Galileo.Screens
             _complete = AllEssentialPlaced();
             _structure.alpha = _complete ? 1f : 0f;
             _outline.alpha = _complete ? 0f : 1f;
+            if (_complete) SetHiddenPartsAlpha(0f);
             RefreshChecklist();
             UpdateStatus();
         }
@@ -394,10 +395,24 @@ namespace Galileo.Screens
                 float k = Mathf.SmoothStep(0f, 1f, t / duration);
                 _structure.alpha = k;
                 _outline.alpha = 1f - k;
+                SetHiddenPartsAlpha(1f - k);
                 yield return null;
             }
             _structure.alpha = 1f;
             _outline.alpha = 0f;
+            SetHiddenPartsAlpha(0f);
+        }
+
+        /// <summary>Parts marked hideWhenComplete overlap the main structure, so they fade out with the outline.</summary>
+        void SetHiddenPartsAlpha(float alpha)
+        {
+            foreach (var piece in _pieces)
+            {
+                if (!piece.part.element.hideWhenComplete) continue;
+                if (!piece.rect.TryGetComponent<CanvasGroup>(out var group)) group = piece.rect.gameObject.AddComponent<CanvasGroup>();
+                group.alpha = alpha;
+                group.blocksRaycasts = alpha > 0f;
+            }
         }
 
         // ---------- Optional part: "Are you sure we need it?" ----------
