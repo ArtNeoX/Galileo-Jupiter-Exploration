@@ -18,7 +18,6 @@ namespace Galileo.Content
         public DialogData atmosProbeDialog = new DialogData();
         public GravityAssistData gravityAssist = new GravityAssistData();
         public LaunchData launch = new LaunchData();
-        public string episodeEndText = "КОНЕЦ 1 ЭПИЗОДА";
         public MenuData menu = new MenuData();
         public GarageData garage = new GarageData();
         public Episode2Data episode2 = new Episode2Data();
@@ -89,6 +88,9 @@ namespace Galileo.Content
         public long cost;
         /// <summary>Placeholder rectangle until the bitmap exists (centre x, y; size w, h; 0..1 of the canvas, y up).</summary>
         public float x = 0.5f, y = 0.5f, w = 0.1f, h = 0.1f;
+        /// <summary>Where the part lies in the garage before it is attached: centre on the garage picture (0..1, y up).
+        /// Negative = pick a free spot at random.</summary>
+        public float homeX = -1f, homeY = -1f;
     }
 
     /// <summary>Episode 2: arrival at Jupiter, the probe release and the descent mini-game.</summary>
@@ -158,8 +160,11 @@ namespace Galileo.Content
         public string analysisDone = "Анализ выполнен";
 
         // Intros and economy
-        public string orbiterProbeIntro = "ORBITER PROBE";
-        public string atmosProbeIntro = "ATMOSPHERIC PROBE";
+        public string garageIntro = "VEHICLE ASSEMBLY BUILDING";
+        public string gravityIntro = "GRAVITY ASSIST PLANNING";
+        public string launchIntro = "LAUNCH PHASE";
+        public string launchSuccessIntro = "SUCCESSFUL LAUNCH";
+        public string descentIntro = "ENTERING JUPITER'S ATMOSPHERE";
         public string budgetLabel = "BUDGET";
     }
 
@@ -243,6 +248,8 @@ namespace Galileo.Content
         /// <summary>Reads the lines from the current content, so a language switch re-reads them.</summary>
         public Func<GalileoContent, string[]> lines;
         public bool portraitLeft;
+        /// <summary>Put the character on the right (the launch pad stays visible on the left).</summary>
+        public bool portraitRight;
         /// <summary>Overrides the character's name (for speakers who aren't team members).</summary>
         public Func<GalileoContent, string> speakerName;
         public Action onFinished;
@@ -262,6 +269,8 @@ namespace Galileo.Content
         public bool waitForInput;
         /// <summary>The screen is already black (coming from another black screen).</summary>
         public bool startBlack;
+        /// <summary>Stay black at the end (the next screen fades in from black by itself).</summary>
+        public bool stayBlack;
         public Color textColor = new Color(0.95f, 0.89f, 0.78f);
     }
 
@@ -315,6 +324,10 @@ namespace Galileo.Content
         public float crossX = 0.5f;
         public float crossY = 0.38f;
         public string successSpeakerId = "";
+        /// <summary>Who scolds the player when the pointer misses both zones (then the same date is tried again).</summary>
+        public string missSpeakerId = "engineer_angry";
+        public string missSpeakerName = "Richard J. Spehalski";
+        public string[] missLines = { "Missed! Try again." };
         public string[] successLines = Array.Empty<string>();
         public LaunchAttempt[] attempts = Array.Empty<LaunchAttempt>();
     }

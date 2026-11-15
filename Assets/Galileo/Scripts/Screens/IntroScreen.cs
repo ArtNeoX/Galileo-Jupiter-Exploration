@@ -54,12 +54,13 @@ namespace Galileo.Screens
             {
                 _clicked = false;
                 StartCoroutine(FadeTo(_hint, 1f, 0.5f));
-                while (!_clicked && !AdvancePressed()) yield return null;                GameAudio.Click();
+                while (!_clicked && !AdvancePressed()) yield return null;
+                GameAudio.Click();
                 StartCoroutine(FadeTo(_hint, 0f, 0.3f));
             }
 
             yield return FadeTo(_text, 0f, TextFade);
-            yield return FadeTo(_black, 0f, BlackFade);
+            if (!_request.stayBlack) yield return FadeTo(_black, 0f, BlackFade);
             _request.onDone?.Invoke();
         }
 

@@ -12,9 +12,10 @@ namespace Galileo.Screens
     /// <summary>
     /// One STS-34 launch attempt. A pointer sweeps along a curved bar with a yellow zone and a narrow green
     /// zone; Space / Enter / click stops it. The UTC clock runs through the real launch window.
-    ///   engineFailure — whatever the result: red cross on the shuttle, then a dialog, then the next date.
-    ///   badWeather    — whatever the result: the pad turns stormy, then a dialog, then the next date.
-    ///   success       — green: engines fire, "Successful" dialog, end of episode. Otherwise: try again.
+    /// Missing both zones (on any date) brings up an angry Spehalski and the same date again. Otherwise:
+    ///   engineFailure — red cross on the shuttle's right main engine, then a dialog, then the next date.
+    ///   badWeather    — the pad turns stormy, then a dialog, then the next date.
+    ///   success       — green: engines fire, the shuttle climbs, "Successful launch" card. Yellow: try again.
     /// </summary>
     public class LaunchScreen : ScreenBase
     {
@@ -173,35 +174,40 @@ namespace Galileo.Screens
             yield return new WaitForSecondsRealtime(0.7f);
             var stage = App.Stage;
             int attempt = App.LaunchIndex;
+
+            // Missed both zones (or let the window close): Spehalski is not amused, and the same date is tried again.
+            if (zone == Zone.Miss || windowClosed)
+            {
+                App.ShowDialog(_data.missSpeakerId, c => c.launch.missLines, App.RetryLaunch, false, c => c.launch.missSpeakerName, true);
+                yield break;
+            }
+
             switch (_attempt.outcome)
             {
                 case "engineFailure":
                     stage.ShowEngineFailure();
                     yield return new WaitForSecondsRealtime(1.4f);
-                    App.ShowDialog(App.SpeakerOrRandom(_attempt.speakerId), c => c.launch.attempts[attempt].lines, App.NextLaunchAttempt, true);
+                    App.ShowDialog(App.SpeakerOrRandom(_attempt.speakerId), c => c.launch.attempts[attempt].lines, App.NextLaunchAttempt, false, null, true);
                     break;
 
                 case "badWeather":
                     stage.SetBadWeather();
                     yield return new WaitForSecondsRealtime(2.2f);
-                    App.ShowDialog(App.SpeakerOrRandom(_attempt.speakerId), c => c.launch.attempts[attempt].lines, App.NextLaunchAttempt, true);
+                    App.ShowDialog(App.SpeakerOrRandom(_attempt.speakerId), c => c.launch.attempts[attempt].lines, App.NextLaunchAttempt, false, null, true);
                     break;
 
                 default: // success
                     if (zone == Zone.Green)
                     {
-                        stage.Ignite();
-                        yield return new WaitForSecondsRealtime(2.2f);
-                        App.ShowDialog(App.SpeakerOrRandom(_data.successSpeakerId), c => c.launch.successLines, App.ShowEpisodeEnd, true);
+                        stage.Ignite(); // engines fire and the shuttle climbs away
+                        yield return new WaitForSecondsRealtime(3f);
+                        App.LaunchSucceeded();
                     }
                     else
                     {
-                        if (!windowClosed)
-                        {
-                            yield return new WaitForSecondsRealtime(0.6f);
-                            _result.text = _data.retry;
-                            _result.color = Theme.Failure;
-                        }
+                        yield return new WaitForSecondsRealtime(0.6f);
+                        _result.text = _data.retry;
+                        _result.color = Theme.Failure;
                         yield return new WaitForSecondsRealtime(1.6f);
                         App.RetryLaunch();
                     }

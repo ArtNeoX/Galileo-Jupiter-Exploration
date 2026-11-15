@@ -40,12 +40,18 @@ namespace Galileo.Screens
                                  k.numpadEnterKey.wasPressedThisFrame || k.rightArrowKey.wasPressedThisFrame);
         }
 
+        /// <summary>The language button was pressed this frame or the one before (its click must not reach the screen).</summary>
+        protected bool JustSwitchedLanguage => Time.frameCount - App.LanguageSwitchFrame <= 1;
+
         /// <summary>Makes the whole screen clickable.</summary>
         protected void MakeClickable(System.Action onClick)
         {
             var hit = Root.gameObject.AddComponent<Image>();
             hit.color = Color.clear;
-            Root.gameObject.AddComponent<ClickCatcher>().Clicked += onClick;
+            Root.gameObject.AddComponent<ClickCatcher>().Clicked += () =>
+            {
+                if (!JustSwitchedLanguage) onClick();
+            };
         }
 
         protected void Header(string title, string subtitle)

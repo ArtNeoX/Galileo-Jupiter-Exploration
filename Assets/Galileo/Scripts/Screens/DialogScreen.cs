@@ -29,7 +29,9 @@ namespace Galileo.Screens
             // Character bitmap, centred
             var portraitBox = UIFactory.Panel("PortraitBox", Root, Color.clear, 16);
             portraitBox.raycastTarget = false;
-            if (dialog.portraitLeft) // aligned with the dialog box's left edge
+            if (dialog.portraitRight) // aligned with the dialog box's right edge
+                portraitBox.rectTransform.Pin(new Vector2(1f, 1f), new Vector2(460, 560), new Vector2(-180, -70));
+            else if (dialog.portraitLeft) // aligned with the dialog box's left edge
                 portraitBox.rectTransform.Pin(new Vector2(0f, 1f), new Vector2(460, 560), new Vector2(180, -70));
             else
                 portraitBox.rectTransform.Pin(new Vector2(0.5f, 1f), new Vector2(460, 560), new Vector2(0, -70));
@@ -41,7 +43,7 @@ namespace Galileo.Screens
             var customName = dialog.speakerName?.Invoke(Content);
             var speakerName = !string.IsNullOrEmpty(customName) ? customName : speaker != null ? speaker.name : "";
             UIFactory.Label("Speaker", Root, speakerName.ToUpperInvariant(), 26, Theme.Accent,
-                    TextAnchor.LowerLeft, FontStyle.Bold)
+                    dialog.portraitRight ? TextAnchor.LowerRight : TextAnchor.LowerLeft, FontStyle.Bold)
                 .rectTransform.Anchor(new Vector2(0, 0), new Vector2(1, 0), new Vector2(206, 316), new Vector2(-180, 356));
 
             // Dialog box

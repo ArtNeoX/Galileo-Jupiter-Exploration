@@ -20,9 +20,9 @@ namespace Galileo.Screens
 
         LaunchData _data;
         CanvasGroup _bad, _burn;
-        RectTransform _shuttleFrame;
+        RectTransform _shuttleFrame, _shuttleRoot;
         Image _cross;
-        Coroutine _weatherFade, _shake;
+        Coroutine _weatherFade, _shake, _rise;
 
         public static LaunchStage Create(RectTransform parent, LaunchData data)
         {
@@ -39,6 +39,7 @@ namespace Galileo.Screens
             _bad = Layer(root, "background_bad", BuildBadWeather).gameObject.AddComponent<CanvasGroup>();
 
             var shuttleRoot = UIFactory.Rect("Shuttle", root).Stretch();
+            _shuttleRoot = shuttleRoot;
             var shuttle = LoadSprite("shuttle");
             var burning = LoadSprite("shuttle_afterburner");
             if (shuttle != null)
@@ -73,7 +74,7 @@ namespace Galileo.Screens
             _cross = UIFactory.Picture("EngineFailure", _shuttleFrame, ProceduralArt.Icon("x_mark"), new Color(0.92f, 0.16f, 0.14f));
             _cross.rectTransform.anchorMin = _cross.rectTransform.anchorMax = new Vector2(_data.crossX, _data.crossY);
             _cross.rectTransform.pivot = new Vector2(0.5f, 0.5f);
-            _cross.rectTransform.sizeDelta = new Vector2(130, 130);
+            _cross.rectTransform.sizeDelta = new Vector2(70, 70);
             _cross.rectTransform.anchoredPosition = Vector2.zero;
 
             ResetState();
@@ -88,6 +89,9 @@ namespace Galileo.Screens
             _burn.alpha = 0f;
             _cross.gameObject.SetActive(false);
             transform.localPosition = Vector3.zero;
+            if (_rise != null) StopCoroutine(_rise);
+            _rise = null;
+            _shuttleRoot.anchoredPosition = Vector2.zero;
         }
 
         public void SetBadWeather(float seconds = 1.6f)
@@ -103,6 +107,19 @@ namespace Galileo.Screens
             StartCoroutine(FadeGroup(_burn, 1f, 0.25f));
             if (_shake != null) StopCoroutine(_shake);
             _shake = StartCoroutine(Shake(1.8f));
+            if (_rise != null) StopCoroutine(_rise);
+            _rise = StartCoroutine(Rise());
+        }
+
+        /// <summary>Lift-off: after a moment on the pad the shuttle accelerates up and out of the picture.</summary>
+        IEnumerator Rise()
+        {
+            yield return new WaitForSecondsRealtime(0.5f);
+            for (float t = 0; t < 6f; t += Time.unscaledDeltaTime)
+            {
+                _shuttleRoot.anchoredPosition = new Vector2(0, 0.5f * 320f * t * t);
+                yield return null;
+            }
         }
 
         IEnumerator PopCross()

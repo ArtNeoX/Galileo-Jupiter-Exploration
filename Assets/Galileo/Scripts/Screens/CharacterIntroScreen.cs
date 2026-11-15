@@ -68,7 +68,7 @@ namespace Galileo.Screens
                 .rectTransform.Pin(new Vector2(0.5f, 0), new Vector2(1200, 40), new Vector2(0, 60));
 
             if (Content.characters.Length == 0) { App.ShowObjectives(); return; }
-            Apply(0);
+            Apply(Mathf.Clamp(App.CharacterIndex, 0, Content.characters.Length - 1));
         }
 
         void Update()
@@ -99,6 +99,7 @@ namespace Galileo.Screens
         void Apply(int index)
         {
             _index = index;
+            App.CharacterIndex = index;
             var c = Content.characters[index];
             ApplyPortrait(_portrait, c.id);
             _name.text = c.name;

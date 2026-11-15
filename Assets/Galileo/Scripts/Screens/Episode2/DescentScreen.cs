@@ -36,6 +36,7 @@ namespace Galileo.Screens
         bool _running, _finished;
 
         public override bool AllowLanguageToggle => false; // timed mini-game
+        public override bool FadesIn => false; // comes out of the black title card by itself
 
         protected override void Build()
         {
@@ -90,7 +91,21 @@ namespace Galileo.Screens
             _timeLeft = data.timeLimit;
             RefreshHud();
             _timer.enabled = false;
+
+            var black = UIFactory.Line(Root, Color.black);
+            black.rectTransform.Stretch();
+            StartCoroutine(FadeOutBlack(black));
             StartCoroutine(Countdown());
+        }
+
+        static IEnumerator FadeOutBlack(Image black)
+        {
+            for (float t = 0; t < 0.8f; t += Time.unscaledDeltaTime)
+            {
+                black.color = new Color(0, 0, 0, 1f - t / 0.8f);
+                yield return null;
+            }
+            Destroy(black.gameObject);
         }
 
         IEnumerator Countdown()

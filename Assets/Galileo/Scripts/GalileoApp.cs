@@ -73,8 +73,13 @@ namespace Galileo
             Content = Resources.Load<TextAsset>(path) != null ? ContentLoader.Load(path) : ContentLoader.Load(contentPath);
         }
 
+        /// <summary>Frame of the last language switch: screens ignore clicks in that frame.</summary>
+        public int LanguageSwitchFrame { get; private set; } = -10;
+
         public void NextLanguage()
         {
+            LanguageSwitchFrame = Time.frameCount;
+            if (EventSystem.current != null) EventSystem.current.SetSelectedGameObject(null);
             _language = (_language + 1) % LanguageLabels.Length;
             LoadContent();
             _languageLabel.text = LanguageLabels[_language];
@@ -116,8 +121,12 @@ namespace Galileo
 
         public void Restart() => ReturnToMenu();
 
+        /// <summary>Team member shown on the introduction screen (kept when the language changes).</summary>
+        public int CharacterIndex { get; set; }
+
         void ResetState()
         {
+            CharacterIndex = 0;
             _conceptIndex = -1;
             CompletedSystems.Clear();
             AnalysedSystems.Clear();
@@ -178,12 +187,12 @@ namespace Galileo
 
         /// <summary>Lines and name are read from the current content, so switching language re-reads them.</summary>
         public void ShowDialog(string speakerId, Func<GalileoContent, string[]> lines, Action onFinished,
-            bool portraitLeft = false, Func<GalileoContent, string> speakerName = null)
+            bool portraitLeft = false, Func<GalileoContent, string> speakerName = null, bool portraitRight = false)
         {
             PendingDialog = new DialogRequest
             {
                 speakerId = speakerId, lines = lines, onFinished = onFinished, portraitLeft = portraitLeft,
-                speakerName = speakerName
+                portraitRight = portraitRight, speakerName = speakerName
             };
             Show<DialogScreen>();
         }
@@ -221,7 +230,7 @@ namespace Galileo
             SelectedConcept = concept;
             if (concept.correct)
             {
-                ShowIntro(new IntroRequest { text = c => c.ui.orbiterProbeIntro, hold = 1.4f, onDone = ShowOrbiterDesign });
+                ShowOrbiterDesign();
                 return;
             }
             var people = Content.characters;
@@ -329,11 +338,20 @@ namespace Galileo
             // LaunchScreen handles L itself (stops the pointer in the green zone).
         }
 
+        /// <summary>Dev shortcut: pays for the skipped systems without the falling "-$" animation.</summary>
         public void SkipOrbiterDesign()
         {
             foreach (var system in Content.orbiterDesign.systems)
-                if (CompletedSystems.Add(system.id)) Spend(system.cost);
+                if (CompletedSystems.Add(system.id)) Budget -= system.cost;
+            _budget.SetAmount(Budget);
             ShowGarage();
+        }
+
+        /// <summary>Dev shortcut in the garage: pays for the parts without the animation.</summary>
+        public void SpendQuietly(long amount)
+        {
+            Budget -= amount;
+            _budget.SetAmount(Budget);
         }
 
         public void CompleteCurrentSystem()
@@ -359,29 +377,23 @@ namespace Galileo
             }
         }
 
+        /// <summary>"Vehicle Assembly Building" card, then the garage.</summary>
         public void ShowGarage()
-        {
-            SetBackground(GarageBackground);
-            SetBackgroundDim(false);
-            Show<GarageScreen>();
-        }
-
-        /// <summary>Garage → "Atmospheric probe" → the atmospheric probe dialog.</summary>
-        public void FinishGarage()
         {
             ShowIntro(new IntroRequest
             {
-                text = c => c.ui.atmosProbeIntro,
+                text = c => c.ui.garageIntro,
                 hold = 1.4f,
                 onBlack = () =>
                 {
-                    var dialog = Content.atmosProbeDialog;
-                    SetBackground(string.IsNullOrEmpty(dialog.background) ? "render_conceptC_Atmos_probe" : dialog.background, 0f);
-                    SetBackgroundDim(dialog.dim, 0f);
+                    SetBackground(GarageBackground, 0f);
+                    SetBackgroundDim(false, 0f);
                 },
-                onDone = ShowAtmosProbeDialog
+                onDone = () => Show<GarageScreen>()
             });
         }
+
+        public void FinishGarage() => ShowAtmosProbeDialog();
 
         // ---------- Scene 5: Atmospheric probe ----------
 
@@ -394,12 +406,24 @@ namespace Galileo
             var dialog = Content.atmosProbeDialog;
             SetBackground(string.IsNullOrEmpty(dialog.background) ? "render_conceptC_Atmos_probe" : dialog.background);
             SetBackgroundDim(dialog.dim);
-            ShowDialog(SpeakerOrRandom(dialog.speakerId), c => c.atmosProbeDialog.lines, ShowGravityAssist, dialog.portraitLeft);
+            ShowDialog(SpeakerOrRandom(dialog.speakerId), c => c.atmosProbeDialog.lines, ShowGravityPlanning, dialog.portraitLeft);
         }
 
         // ---------- Gravity assist and launch ----------
 
         public void ShowGravityAssist() => Show<GravityAssistScreen>();
+
+        /// <summary>"Gravity assist planning" card, then the launch window map.</summary>
+        // The map has a dark background, so the card stays dark and the map fades in over it (no render in between).
+        public void ShowGravityPlanning() =>
+            ShowIntro(new IntroRequest
+            {
+                text = c => c.ui.gravityIntro,
+                hold = 1.4f,
+                stayBlack = true,
+                onBlack = () => FadeBackgroundTo(1f, 0f),
+                onDone = ShowGravityAssist
+            });
 
         /// <summary>Launch pad bitmaps; stays on screen behind the launch dialogs.</summary>
         public LaunchStage Stage { get; private set; }
@@ -408,12 +432,38 @@ namespace Galileo
         public LaunchAttempt CurrentLaunch =>
             Content.launch.attempts[Mathf.Clamp(LaunchIndex, 0, Content.launch.attempts.Length - 1)];
 
+        /// <summary>"Launch phase" card; the launch pad appears behind it, then the first attempt.</summary>
         public void StartLaunch()
         {
             LaunchIndex = 0;
-            if (Stage == null) Stage = LaunchStage.Create(_stageLayer, Content.launch);
-            Stage.ResetState();
-            Show<LaunchScreen>();
+            ShowIntro(new IntroRequest
+            {
+                text = c => c.ui.launchIntro,
+                hold = 1.4f,
+                onBlack = () =>
+                {
+                    if (Stage == null) Stage = LaunchStage.Create(_stageLayer, Content.launch);
+                    Stage.ResetState();
+                },
+                onDone = () => Show<LaunchScreen>()
+            });
+        }
+
+        /// <summary>The shuttle is climbing: "Successful launch" card, then straight into episode 2.</summary>
+        public void LaunchSucceeded()
+        {
+            ShowIntro(new IntroRequest
+            {
+                text = c => c.ui.launchSuccessIntro,
+                hold = 1.6f,
+                stayBlack = true,
+                onBlack = () =>
+                {
+                    if (Stage != null) Destroy(Stage.gameObject);
+                    Stage = null;
+                },
+                onDone = StartEpisode2
+            });
         }
 
         public void NextLaunchAttempt()
@@ -426,7 +476,6 @@ namespace Galileo
         /// <summary>Same date again (the last attempt missed the green zone).</summary>
         public void RetryLaunch() => Show<LaunchScreen>();
 
-        public void ShowEpisodeEnd() => Show<EpisodeEndScreen>();
 
         // ---------- Episode 2 ----------
 
@@ -451,7 +500,9 @@ namespace Galileo
             Show<SeparationScreen>();
         }
 
-        public void ShowDescent() => Show<DescentScreen>();
+        /// <summary>"Entering Jupiter's atmosphere" card, then the descent mini-game (which fades in from black).</summary>
+        public void ShowDescent() =>
+            ShowIntro(new IntroRequest { text = c => c.ui.descentIntro, hold = 1.4f, stayBlack = true, onDone = () => Show<DescentScreen>() });
 
         public void GameOver()
         {
@@ -585,6 +636,7 @@ namespace Galileo
             _overlay = UIFactory.Rect("Overlay", root).Stretch();
             _languageButton = UIFactory.Button("Language", _overlay, LanguageLabels[_language], NextLanguage);
             _languageButton.GetComponent<RectTransform>().Pin(new Vector2(1, 1), new Vector2(92, 42), new Vector2(-24, -12));
+            _languageButton.navigation = new Navigation { mode = Navigation.Mode.None }; // Space / Enter never re-trigger it
             _languageLabel = _languageButton.transform.Find("Label").GetComponent<Text>();
             _languageLabel.fontSize = 22;
             _budget = BudgetHud.Create(_overlay);
@@ -629,10 +681,28 @@ namespace Galileo
         Coroutine _dimFade;
 
         /// <summary>Fades the darkening layer over the render in (on) or out (off).</summary>
-        public void SetBackgroundDim(bool on, float fadeSeconds = 0.8f)
+        public void SetBackgroundDim(bool on, float fadeSeconds = 0.8f) =>
+            FadeBackgroundTo(on ? Theme.BackgroundDim.a : 0f, fadeSeconds);
+
+        /// <summary>Darkening layer to any opacity (1 = the render is fully hidden behind a dark backdrop).</summary>
+        public void FadeBackgroundTo(float alpha, float fadeSeconds)
         {
             if (_dimFade != null) StopCoroutine(_dimFade);
-            _dimFade = StartCoroutine(FadeDim(on ? Theme.BackgroundDim.a : 0f, fadeSeconds));
+            _dimFade = StartCoroutine(FadeDim(alpha, fadeSeconds));
+        }
+
+        /// <summary>
+        /// A point on the current background picture (0..1, y up) in world space, following how the picture is
+        /// scaled and cropped to fill the screen. False if no picture is showing.
+        /// </summary>
+        public bool BackgroundPoint(Vector2 normalized, out Vector3 world)
+        {
+            world = Vector3.zero;
+            if (_backgroundLayer.childCount == 0) return false;
+            var rt = (RectTransform)_backgroundLayer.GetChild(_backgroundLayer.childCount - 1);
+            var r = rt.rect;
+            world = rt.TransformPoint(new Vector3(r.xMin + r.width * normalized.x, r.yMin + r.height * normalized.y, 0));
+            return true;
         }
 
         System.Collections.IEnumerator FadeDim(float target, float duration)

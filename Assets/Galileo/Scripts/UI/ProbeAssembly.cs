@@ -13,6 +13,8 @@ namespace Galileo.UI
         public Sprite sprite;
         /// <summary>Where the part sits on the shared canvas, normalised 0..1 with y up.</summary>
         public Rect area;
+        /// <summary>Centre of the part's solid pixels on the canvas (faint strokes can make <see cref="area"/> much bigger).</summary>
+        public Vector2 focus;
     }
 
     /// <summary>
@@ -46,20 +48,23 @@ namespace Galileo.UI
         {
             var file = FileOf(e);
             if (Cache.TryGetValue(file, out var cached) && cached.sprite != null)
-                return new ProbePart { element = e, sprite = cached.sprite, area = cached.area };
+                return new ProbePart { element = e, sprite = cached.sprite, area = cached.area, focus = cached.focus };
 
             var full = Load(file);
             if (full == null)
-                return new ProbePart { element = e, area = new Rect(e.x - e.w / 2f, e.y - e.h / 2f, e.w, e.h) };
+            {
+                var placeholder = new Rect(e.x - e.w / 2f, e.y - e.h / 2f, e.w, e.h);
+                return new ProbePart { element = e, area = placeholder, focus = placeholder.center };
+            }
 
-            var bounds = VisibleBounds(full);
+            var bounds = VisibleBounds(full, out var solidCentre);
             var r = full.rect;
             var px = new Rect(Mathf.Floor(r.x + bounds.xMin * r.width), Mathf.Floor(r.y + bounds.yMin * r.height), 0, 0);
             px.xMax = Mathf.Min(r.xMax, Mathf.Ceil(r.x + bounds.xMax * r.width));
             px.yMax = Mathf.Min(r.yMax, Mathf.Ceil(r.y + bounds.yMax * r.height));
             var sprite = Sprite.Create(full.texture, px, new Vector2(0.5f, 0.5f), 100f, 0, SpriteMeshType.FullRect);
             var area = new Rect((px.x - r.x) / r.width, (px.y - r.y) / r.height, px.width / r.width, px.height / r.height);
-            var part = new ProbePart { element = e, sprite = sprite, area = area };
+            var part = new ProbePart { element = e, sprite = sprite, area = area, focus = solidCentre };
             Cache[file] = part;
             return part;
         }
@@ -68,7 +73,10 @@ namespace Galileo.UI
         /// Normalised rect of the pixels that aren't transparent. Reads the texture back through the GPU so the
         /// bitmap doesn't need Read/Write enabled.
         /// </summary>
-        public static Rect VisibleBounds(Sprite sprite)
+        public static Rect VisibleBounds(Sprite sprite) => VisibleBounds(sprite, out _);
+
+        /// <param name="solidCentre">Centre of mass of the clearly opaque pixels (normalised like the result).</param>
+        public static Rect VisibleBounds(Sprite sprite, out Vector2 solidCentre)
         {
             var tex = sprite.texture;
             var r = sprite.rect;
@@ -90,16 +98,31 @@ namespace Galileo.UI
             else Object.DestroyImmediate(read);
 
             int minX = w, minY = h, maxX = -1, maxY = -1;
+            double sumX = 0, sumY = 0, weight = 0;
             for (int y = 0; y < h; y++)
             for (int x = 0; x < w; x++)
             {
-                if (pixels[y * w + x].a <= 12) continue;
+                byte a = pixels[y * w + x].a;
+                if (a >= 160)
+                {
+                    sumX += (x + 0.5) * a;
+                    sumY += (y + 0.5) * a;
+                    weight += a;
+                }
+                if (a <= 12) continue;
                 if (x < minX) minX = x;
                 if (x > maxX) maxX = x;
                 if (y < minY) minY = y;
                 if (y > maxY) maxY = y;
             }
-            if (maxX < 0) return new Rect(0, 0, 1, 1);
+            if (maxX < 0)
+            {
+                solidCentre = new Vector2(0.5f, 0.5f);
+                return new Rect(0, 0, 1, 1);
+            }
+            solidCentre = weight > 0
+                ? new Vector2((float)(sumX / weight) / w, (float)(sumY / weight) / h)
+                : new Vector2((minX + maxX + 1) * 0.5f / w, (minY + maxY + 1) * 0.5f / h);
             // One pixel of slack on each side so antialiased edges aren't cut.
             return Rect.MinMaxRect(Mathf.Max(0, minX - 1) / (float)w, Mathf.Max(0, minY - 1) / (float)h,
                 Mathf.Min(w, maxX + 2) / (float)w, Mathf.Min(h, maxY + 2) / (float)h);

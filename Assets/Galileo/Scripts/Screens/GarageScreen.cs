@@ -191,10 +191,17 @@ namespace Galileo.Screens
                 piece.rect.anchorMin = piece.rect.anchorMax = piece.rect.pivot = new Vector2(0.5f, 0.5f);
                 piece.rect.sizeDelta = size;
 
-                piece.home = ScatterPosition(size, piece.target, boardSize, frameRect, homes);
+                Vector3 world = default;
+                bool fixedHome = e.homeX >= 0f && e.homeY >= 0f &&
+                                 App.BackgroundPoint(new Vector2(e.homeX, e.homeY), out world);
+                // A fixed spot in the garage picture puts the part's solid pixels there (not its bounding box centre).
+                var focusOffset = Vector2.Scale(piece.part.focus - piece.part.area.center, frameSize);
+                piece.home = fixedHome
+                    ? (Vector2)_board.InverseTransformPoint(world) - focusOffset
+                    : ScatterPosition(size, piece.target, boardSize, frameRect, homes);
                 homes.Add(piece.home);
                 piece.goal = piece.placed ? piece.target : piece.home;
-                piece.tilt = piece.placed ? 0f : Random.Range(-12f, 12f);
+                piece.tilt = piece.placed || fixedHome ? 0f : Random.Range(-12f, 12f);
                 piece.rect.anchoredPosition = piece.goal;
                 piece.rect.localRotation = Quaternion.Euler(0, 0, piece.tilt);
 
@@ -342,7 +349,9 @@ namespace Galileo.Screens
             piece.rect.SetParent(_placedLayer, true); // the frame shares the board's centre, so the position carries over
             piece.goal = piece.target;
             SortPlaced(piece);
-            App.Spend(piece.part.element.cost); // every part is paid for as it is installed
+            // Every part is paid for as it is installed.
+            if (animate) App.Spend(piece.part.element.cost);
+            else App.SpendQuietly(piece.part.element.cost);
             if (animate)
             {
                 GameAudio.Play("popup", 0.8f);
