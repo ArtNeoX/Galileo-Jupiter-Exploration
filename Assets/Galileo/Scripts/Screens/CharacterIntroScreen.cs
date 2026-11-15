@@ -32,10 +32,9 @@ namespace Galileo.Screens
             _card = card.gameObject.AddComponent<CanvasGroup>();
 
             // Left: character bitmap
-            var portraitBox = UIFactory.Panel("PortraitBox", card.transform, Theme.PanelDeep, 16);
+            var portraitBox = UIFactory.Panel("PortraitBox", card.transform, Color.clear, 16);
             portraitBox.raycastTarget = false;
             portraitBox.rectTransform.Anchor(new Vector2(0, 0), new Vector2(0, 1), new Vector2(40, 40), new Vector2(500, -40));
-            UIFactory.Frame(portraitBox.transform, Theme.Line, 16, 2);
             _portrait = UIFactory.Picture("Portrait", portraitBox.transform, null, Color.white);
             _portrait.rectTransform.Stretch(14, 14, 14, 14);
 

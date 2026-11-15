@@ -74,9 +74,8 @@ namespace Galileo.Screens
         /// <summary>Framed character bitmap with the name underneath. Size/position it via the returned rect.</summary>
         protected RectTransform PortraitCard(Transform parent, string characterId)
         {
-            var box = UIFactory.Panel("Portrait " + characterId, parent, Theme.PanelDeep, 16);
+            var box = UIFactory.Panel("Portrait " + characterId, parent, Color.clear, 16);
             box.raycastTarget = false;
-            UIFactory.Frame(box.transform, Theme.Line, 16, 2);
             var portrait = UIFactory.Picture("Portrait", box.transform, null, Color.white);
             portrait.rectTransform.Stretch(12, 12, 12, 12);
             ApplyPortrait(portrait, characterId);

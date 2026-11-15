@@ -69,6 +69,8 @@ namespace Galileo.Content
         /// <summary>Character id for the "do we need it?" question; empty picks a random team member.</summary>
         public string optionalSpeakerId = "";
         public string[] optionalLines = { "Are you sure we need it? It costs additional money." };
+        /// <summary>What the same team member says after the optional part is attached anyway.</summary>
+        public string[] overBudgetLines = { "You have spent our entire budget!" };
         public string attachAnyway = "ATTACH ANYWAY";
         public string leaveIt = "LEAVE IT";
         public GarageElement[] elements = Array.Empty<GarageElement>();

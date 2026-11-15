@@ -45,20 +45,26 @@ namespace Galileo.Screens
 
         public override bool ShowBudget => true;
 
+        // The garage picture is bright, so the free-standing text is dark.
+        static readonly Color DarkText = new Color(0.17f, 0.12f, 0.1f);
+        static readonly Color DarkMuted = new Color(0.3f, 0.24f, 0.2f);
+        static readonly Color DarkSuccess = new Color(0.16f, 0.42f, 0.18f);
+
         protected override void Build()
         {
             _data = Content.garage;
 
-            var plate = UIFactory.Panel("TitlePlate", Root, new Color(Theme.PanelDeep.r, Theme.PanelDeep.g, Theme.PanelDeep.b, 0.82f), 16);
-            plate.raycastTarget = false;
-            plate.rectTransform.Anchor(new Vector2(0, 1), new Vector2(0, 1), new Vector2(30, -152), new Vector2(980, -24));
-            UIFactory.Label("Title", Root, (_data.title ?? "").ToUpperInvariant(), 44, Theme.Accent, TextAnchor.MiddleLeft, FontStyle.Bold)
+            UIFactory.Label("Title", Root, (_data.title ?? "").ToUpperInvariant(), 44, DarkText, TextAnchor.MiddleLeft, FontStyle.Bold)
                 .rectTransform.Anchor(new Vector2(0, 1), Vector2.one, new Vector2(60, -96), new Vector2(-560, -36));
-            _status = UIFactory.Label("Hint", Root, _data.hint, 24, Theme.TextMuted, TextAnchor.UpperLeft, FontStyle.Italic);
+            _status = UIFactory.Label("Hint", Root, _data.hint, 24, DarkMuted, TextAnchor.UpperLeft, FontStyle.Italic);
             _status.rectTransform.Anchor(new Vector2(0, 1), Vector2.one, new Vector2(62, -140), new Vector2(-560, -100));
-            // Text shadows so the title reads on the garage picture.
+            // A soft light halo so the dark text stays readable on the busier parts of the garage picture.
             foreach (var t in new[] { _status, Root.Find("Title").GetComponent<Text>() })
-                t.gameObject.AddComponent<Shadow>().effectDistance = new Vector2(2, -2);
+            {
+                var halo = t.gameObject.AddComponent<Outline>();
+                halo.effectColor = new Color(1f, 1f, 1f, 0.45f);
+                halo.effectDistance = new Vector2(1.5f, -1.5f);
+            }
 
             _board = UIFactory.Rect("Board", Root);
             _board.Anchor(Vector2.zero, Vector2.one, new Vector2(30, 30), new Vector2(-520, -150));
@@ -149,7 +155,7 @@ namespace Galileo.Screens
         void UpdateStatus()
         {
             _status.text = _complete ? _data.completeMessage : _data.hint;
-            _status.color = _complete ? Theme.Success : Theme.TextMuted;
+            _status.color = _complete ? DarkSuccess : DarkMuted;
         }
 
         void ShowInfo(GarageElement e)
@@ -336,7 +342,7 @@ namespace Galileo.Screens
             piece.rect.SetParent(_placedLayer, true); // the frame shares the board's centre, so the position carries over
             piece.goal = piece.target;
             SortPlaced(piece);
-            if (piece.part.element.optional) App.Spend(piece.part.element.cost);
+            App.Spend(piece.part.element.cost); // every part is paid for as it is installed
             if (animate)
             {
                 GameAudio.Play("popup", 0.8f);
@@ -354,11 +360,12 @@ namespace Galileo.Screens
             const float duration = 0.3f;
             for (float t = 0; t < duration; t += Time.unscaledDeltaTime)
             {
+                if (rt == null) yield break; // the box was replaced (e.g. by the over-budget line)
                 float s = 1f + 0.12f * Mathf.Sin(Mathf.PI * t / duration);
                 rt.localScale = new Vector3(s, s, 1);
                 yield return null;
             }
-            rt.localScale = Vector3.one;
+            if (rt != null) rt.localScale = Vector3.one;
         }
 
         bool AllEssentialPlaced()
@@ -386,52 +393,72 @@ namespace Galileo.Screens
 
         // ---------- Optional part: "Are you sure we need it?" ----------
 
+        string _speaker;
+
         void OpenPrompt(Piece piece)
         {
             _pending = piece;
-            GameAudio.Play("popup");
+            _speaker = App.SpeakerOrRandom(_data.optionalSpeakerId);
+            var cost = piece.part.element.cost;
+            var box = Speech(_data.optionalLines);
+            var attach = UIFactory.Button("Attach", box,
+                (_data.attachAnyway ?? "").ToUpperInvariant() + (cost > 0 ? "  (−" + BudgetHud.Money(cost) + ")" : ""), () => ClosePrompt(true));
+            attach.GetComponent<RectTransform>().Pin(new Vector2(1, 0), new Vector2(560, 70), new Vector2(-30, 26));
+            attach.transform.Find("Label").GetComponent<Text>().BestFit(16, 26);
+            var leave = UIFactory.Button("Leave", box, (_data.leaveIt ?? "").ToUpperInvariant(), () => ClosePrompt(false));
+            leave.GetComponent<RectTransform>().Pin(new Vector2(1, 0), new Vector2(260, 70), new Vector2(-610, 26));
+            leave.transform.Find("Label").GetComponent<Text>().BestFit(16, 26);
+        }
 
+        /// <summary>A team member at the bottom of the screen with a speech box; blocks the garage until closed.</summary>
+        RectTransform Speech(string[] lines)
+        {
+            ClosePromptUi();
+            GameAudio.Play("popup");
             var shade = UIFactory.Line(Root, new Color(0, 0, 0, 0.45f));
             shade.raycastTarget = true; // blocks the garage while the question is open
             _prompt = shade.rectTransform;
             _prompt.Stretch();
 
-            var speaker = App.SpeakerOrRandom(_data.optionalSpeakerId);
-            var portrait = PortraitCard(_prompt, speaker);
+            var portrait = PortraitCard(_prompt, _speaker);
             portrait.Pin(new Vector2(0, 0), new Vector2(240, 300), new Vector2(120, 80));
 
             var box = UIFactory.Panel("Box", _prompt, Theme.Panel, 22);
             box.raycastTarget = false;
             box.rectTransform.Anchor(Vector2.zero, new Vector2(1, 0), new Vector2(400, 80), new Vector2(-520, 330));
             UIFactory.Frame(box.transform, Theme.AccentDark, 22, 2);
-            var person = Content.FindCharacter(speaker);
+            var person = Content.FindCharacter(_speaker);
             UIFactory.Label("Speaker", box.transform, person != null ? person.name.ToUpperInvariant() : "", 24, Theme.Accent, TextAnchor.UpperLeft, FontStyle.Bold)
                 .rectTransform.Anchor(new Vector2(0, 1), Vector2.one, new Vector2(36, -60), new Vector2(-36, -22));
-            var lines = _data.optionalLines != null ? string.Join("\n", _data.optionalLines) : "";
-            UIFactory.Label("Text", box.transform, lines, 32, Theme.Text).BestFit(20, 32)
+            UIFactory.Label("Text", box.transform, lines != null ? string.Join("\n", lines) : "", 32, Theme.Text).BestFit(20, 32)
                 .rectTransform.Stretch(36, 70, 36, 110);
-
-            var cost = piece.part.element.cost;
-            var attach = UIFactory.Button("Attach", box.transform,
-                (_data.attachAnyway ?? "").ToUpperInvariant() + (cost > 0 ? "  (−" + BudgetHud.Money(cost) + ")" : ""), () => ClosePrompt(true));
-            attach.GetComponent<RectTransform>().Pin(new Vector2(1, 0), new Vector2(560, 70), new Vector2(-30, 26));
-            attach.transform.Find("Label").GetComponent<Text>().BestFit(16, 26);
-            var leave = UIFactory.Button("Leave", box.transform, (_data.leaveIt ?? "").ToUpperInvariant(), () => ClosePrompt(false));
-            leave.GetComponent<RectTransform>().Pin(new Vector2(1, 0), new Vector2(260, 70), new Vector2(-610, 26));
-            leave.transform.Find("Label").GetComponent<Text>().BestFit(16, 26);
-
             StartCoroutine(Pop(box.rectTransform));
+            return box.rectTransform;
+        }
+
+        void ClosePromptUi()
+        {
+            if (_prompt != null) Destroy(_prompt.gameObject);
+            _prompt = null;
         }
 
         void ClosePrompt(bool attach)
         {
             var piece = _pending;
             _pending = null;
-            if (_prompt != null) Destroy(_prompt.gameObject);
-            _prompt = null;
+            ClosePromptUi();
             if (piece == null) return;
-            if (attach) Attach(piece, true);
-            else piece.goal = piece.home;
+            if (!attach)
+            {
+                piece.goal = piece.home;
+                return;
+            }
+            Attach(piece, true);
+            // The same team member scolds the player for going over budget.
+            if (_data.overBudgetLines == null || _data.overBudgetLines.Length == 0) return;
+            var box = Speech(_data.overBudgetLines);
+            var ok = UIFactory.Button("Ok", box, Ui.next.ToUpperInvariant(), ClosePromptUi);
+            ok.GetComponent<RectTransform>().Pin(new Vector2(1, 0), new Vector2(260, 70), new Vector2(-30, 26));
         }
 
         /// <summary>Dev shortcut L: attaches every essential part.</summary>

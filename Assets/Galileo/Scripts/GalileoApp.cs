@@ -150,13 +150,15 @@ namespace Galileo
 
         public long Budget { get; private set; }
 
-        /// <summary>The design systems' costs add up to the starting budget, so it ends at exactly $0.</summary>
+        /// <summary>The design systems and the essential garage parts add up to the starting budget, so it ends at exactly $0.</summary>
         public long StartBudget
         {
             get
             {
                 long sum = 0;
                 foreach (var s in Content.orbiterDesign.systems) sum += s.cost;
+                foreach (var e in Content.garage.elements)
+                    if (!e.optional) sum += e.cost;
                 return sum;
             }
         }

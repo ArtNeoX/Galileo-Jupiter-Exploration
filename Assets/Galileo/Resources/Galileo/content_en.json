@@ -64,7 +64,7 @@
       "id": "spehalski",
       "name": "Richard J. Spehalski",
       "role": "Engineer and later Project Manager",
-      "bio": "Spehalski joined the Jet Propulsion Laboratory (JPL) in 1959 as a mechanical engineer. During his career he held engineering and management positions on the Galileo and Voyager programmes. In February 1988 he succeeded Casani as Galileo Project Manager and stayed in that role until 1990.",
+      "bio": "Spehalski joined the Jet Propulsion Laboratory (JPL) in 1959 as a mechanical engineer. During his career he held engineering and management positions on the Galileo and Voyager programmes. In February 1988 he succeeded Casani as Galileo Project Manager and stayed in that role until 1990. He should therefore be seen first of all as a specialist in engineering systems and in managing the project at a later stage, rather than as the leader of Galileo from the very beginning.",
       "education": "BSc in Mechanical Engineering, Cornell University, 1958.",
       "specialization": "spacecraft mechanical systems, engineering management and integration of complex projects.",
       "teamRole": "worked on the engineering development of Galileo and later led the whole project through launch preparation and the start of the flight."
@@ -78,25 +78,25 @@
       {
         "number": "01",
         "title": "Atmosphere",
-        "info": "What is Jupiter's atmosphere made of and how is it structured?",
+        "info": "What is Jupiter's atmosphere made of and how is it structured?\n\nDetermining the chemical composition of the atmosphere and studying its temperature profiles, pressure, cloud layers, winds and gas circulation.",
         "icon": "atmosphere"
       },
       {
         "number": "02",
         "title": "Magnetosphere",
-        "info": "What are the properties of the planet's magnetic field and radiation environment?",
+        "info": "What are the properties of the planet's magnetic field and radiation environment?\n\nDetermining the structure and strength of Jupiter's magnetic field and studying the radiation belts, charged-particle flows and magnetospheric processes.",
         "icon": "magnetosphere"
       },
       {
         "number": "03",
         "title": "Moons",
-        "info": "How do Jupiter's moons differ and what processes take place on their surfaces?",
+        "info": "How do Jupiter's moons differ and what processes take place on their surfaces?\n\nStudying the geology, chemical composition and physical properties of Io, Europa, Ganymede and Callisto, including volcanic activity and possible subsurface oceans.",
         "icon": "moons"
       },
       {
         "number": "04",
         "title": "Atmospheric probe",
-        "info": "Can the atmosphere be measured directly with a separate probe?",
+        "info": "Can the atmosphere be measured directly with a separate probe?\n\nMeasuring the amounts of helium, hydrogen, water and other gases, the temperature, pressure and wind speed at different depths, and studying the cloud layers, lightning and atmospheric circulation of Jupiter.",
         "icon": "probe"
       }
     ]
@@ -117,7 +117,7 @@
         "letter": "A",
         "title": "Flyby spacecraft",
         "subtitle": "Jupiter flyby",
-        "info": "A flyby spacecraft travels to Jupiter, makes observations during its close approach to the planet and its moons, and then continues on a heliocentric trajectory. It does not perform a manoeuvre to enter a permanent orbit around Jupiter.",
+        "info": "A flyby spacecraft travels to Jupiter, makes observations during its close approach to the planet and its moons, and then continues on a heliocentric trajectory. It does not perform a manoeuvre to enter a permanent orbit around Jupiter.\n\n<b>How does the mission work?</b>\n• During the approach the instruments measure the atmosphere, magnetic field and radiation environment and observe the moons.\n• The spacecraft collects data only for a limited time, because it passes the closest-approach region quickly.\n• After the flyby it can continue to other targets if its trajectory and propellant allow.",
         "pros": "the architecture is potentially simpler, and not having to enter Jupiter orbit removes the demanding capture manoeuvre.",
         "cons": "short observation windows and fewer chances to study the same regions again. If an important measurement fails during the flyby, it may be impossible to repeat it.",
         "icon": "flyby",
@@ -131,7 +131,7 @@
         "letter": "B",
         "title": "Orbiter",
         "subtitle": "Jupiter orbiter",
-        "info": "The spacecraft travels to Jupiter and performs a braking manoeuvre so that the planet's gravity captures it into orbit. Instead of one short encounter it carries out a long science programme, completing a series of orbits and flying close to Jupiter's moons.",
+        "info": "The spacecraft travels to Jupiter and performs a braking manoeuvre so that the planet's gravity captures it into orbit. Instead of one short encounter it carries out a long science programme, completing a series of orbits and flying close to Jupiter's moons.\n\n<b>How does the mission work?</b>\n• After the interplanetary cruise the spacecraft slows down relative to Jupiter enough for the planet to capture it into orbit.\n• In orbit it regularly observes the atmosphere, measures the magnetic field and radiation environment, and studies the rings and moons.\n• Planners can change individual orbits to bring the spacecraft close to different moons.\n• The collected data are stored on board and sent to Earth through the deep space communication network.",
         "pros": "the ability to make repeated observations, compare changes over time and study different moons within one mission.",
         "cons": "higher demands on navigation, propellant and spacecraft reliability. An error in the capture manoeuvre could leave the spacecraft outside its planned orbit.",
         "icon": "orbiter",
@@ -145,7 +145,7 @@
         "letter": "C",
         "title": "Orbiter with an atmospheric probe",
         "subtitle": "Orbiter + atmospheric probe",
-        "info": "This architecture combines two complementary parts: an orbiter (Galileo Orbiter) for long-term study of the Jupiter system and a separate probe (Galileo Atmospheric Probe) that enters the planet's atmosphere directly. The orbiter and the probe have different tasks and different sets of science instruments.",
+        "info": "This architecture combines two complementary parts: an orbiter (Galileo Orbiter) for long-term study of the Jupiter system and a separate probe (Galileo Atmospheric Probe) that enters the planet's atmosphere directly. The orbiter and the probe have different tasks and different sets of science instruments.\n\n<b>How does the mission work?</b>\n1. Interplanetary cruise: the main spacecraft carries the probe to Jupiter.\n2. Probe separation: before arrival the probe separates and heads along its atmospheric entry trajectory.\n3. Atmospheric entry: a heat shield protects the probe, then a parachute opens.\n4. Data collection: the probe measures temperature, pressure, chemical composition and cloud properties where it descends.\n5. Data relay: the probe sends its measurements to the orbiter, which passes them on to Earth.\n6. Orbital studies: the main spacecraft enters orbit and begins its long study of Jupiter and its moons.",
         "pros": "the mission gets two kinds of scientific data. The probe measures the atmosphere directly during its descent, while the orbiter provides long-term observations and studies of the moons. The two methods complement each other.",
         "cons": "the architecture is more complex and heavier than a single orbiter. Two trajectories have to be coordinated, and the probe must separate and transmit its data within a limited time. The probe does not replace the orbiter: it only carries out its own limited measurement programme during the descent.",
         "icon": "orbiter_probe",
@@ -214,7 +214,7 @@
           "tolerance": 0.005,
           "infoTitle": "Material comparison"
         },
-        "cost": 240000000
+        "cost": 150000000
       },
       {
         "id": "thermal",
@@ -263,7 +263,7 @@
           "successMessage": "All the advantages and disadvantages are sorted correctly!",
           "errorMessage": "There are mistakes — the wrong cards went back down."
         },
-        "cost": 160000000
+        "cost": 150000000
       },
       {
         "id": "structural",
@@ -311,7 +311,7 @@
             "The test will be carried out without you."
           ]
         },
-        "cost": 380000000
+        "cost": 150000000
       },
       {
         "id": "power",
@@ -359,7 +359,7 @@
             "The test will be carried out without you. You're not wearing any radiation protection gear!"
           ]
         },
-        "cost": 420000000
+        "cost": 150000000
       }
     ]
   },
@@ -432,7 +432,7 @@
         "utcStart": "17:29",
         "utcEnd": "17:39",
         "outcome": "engineFailure",
-        "speakerId": "",
+        "speakerId": "spehalski",
         "lines": [
           "The Galileo launch has been scrubbed because of a faulty controller on main engine No. 2 of the shuttle Atlantis. During pre-launch checks the system returned incorrect data, and the engineers could not guarantee it would work reliably.",
           "We have decided to replace the controller, because the safety of the crew and the spacecraft remains our top priority. The launch is moved to 17 October 1989."
@@ -476,10 +476,13 @@
     "checklistTitle": "Checklist",
     "completeMessage": "All essential systems are attached.",
     "optionalLines": [
-      "Are you sure we need it? It costs additional money."
+      "Are you sure you want to add the backup antenna? We could go over our budget!"
     ],
     "attachAnyway": "Attach anyway",
     "leaveIt": "Leave it",
+    "overBudgetLines": [
+      "There you go! You've spent our entire budget — now we're in the red!"
+    ],
     "outlineFile": "outline",
     "structureFile": "main_structure",
     "structureX": 0.5,
@@ -491,10 +494,10 @@
       {
         "id": "retro_propulsion_module",
         "file": "retro_propulsion_module",
-        "name": "Retro-propulsion module",
-        "info": "A 400 N main engine and small thrusters for Jupiter orbit insertion and trajectory corrections.",
+        "name": "Retro-Propulsion Module",
+        "info": "The Retro-Propulsion Module provided the main thrust required to change Galileo's velocity and trajectory. Its primary engine performed major manoeuvres, including slowing the spacecraft down to enter Jupiter's orbit. The propulsion system also enabled trajectory adjustments during the mission.",
         "optional": false,
-        "cost": 0,
+        "cost": 110000000,
         "x": 0.36,
         "y": 0.5,
         "w": 0.1,
@@ -503,10 +506,10 @@
       {
         "id": "radioisotope_thermoelectric_generator",
         "file": "radioisotope_thermoelectric_generator",
-        "name": "Radioisotope generators (RTGs)",
-        "info": "Two plutonium-238 generators mounted on a boom away from the instruments. Together they produced about 570 W of electrical power at launch.",
+        "name": "Radioisotope Thermoelectric Generators (RTGs)",
+        "info": "The two RTGs provided electrical power throughout the mission by converting heat from the radioactive decay of Plutonium-238 into electricity. They supplied energy to Galileo's scientific instruments, computers, communication systems and other onboard equipment, allowing the spacecraft to operate far from the Sun.",
         "optional": false,
-        "cost": 0,
+        "cost": 130000000,
         "x": 0.22,
         "y": 0.62,
         "w": 0.3,
@@ -515,10 +518,10 @@
       {
         "id": "magnetometer_sensors",
         "file": "magnetometer_sensors",
-        "name": "Magnetometer boom",
-        "info": "An 11 m boom that carries the magnetometer sensors away from the spacecraft's own magnetic field.",
+        "name": "Magnetometer Sensors",
+        "info": "The Magnetometer Sensors were mounted on an approximately 11-metre-long boom extending from the spacecraft. They measured the strength and direction of magnetic fields around Jupiter and its moons. Their observations helped scientists investigate Jupiter's magnetosphere and understand the magnetic properties of its natural satellites.",
         "optional": false,
-        "cost": 0,
+        "cost": 90000000,
         "x": 0.7,
         "y": 0.3,
         "w": 0.5,
@@ -527,10 +530,10 @@
       {
         "id": "attitude_control_thrusters",
         "file": "attitude_control_thrusters",
-        "name": "Attitude control thrusters",
-        "info": "Small thrusters that turn and steady the spacecraft so its instruments and antennas point the right way.",
+        "name": "Attitude Control Thrusters",
+        "info": "The Attitude Control Thrusters were responsible for controlling the spacecraft's orientation and rotational movement. They used small bursts of propellant to adjust Galileo's position in space, allowing it to point its antennas towards Earth and direct its scientific instruments towards specific targets.",
         "optional": false,
-        "cost": 0,
+        "cost": 60000000,
         "x": 0.42,
         "y": 0.44,
         "w": 0.1,
@@ -539,10 +542,10 @@
       {
         "id": "high_gain_antenna",
         "file": "high_gain_antenna",
-        "name": "High-gain antenna",
-        "info": "A 4.8 m umbrella-like antenna that unfolds in space. The main communication channel: it sends science data to Earth at a high rate.",
+        "name": "High-Gain Antenna (HGA)",
+        "info": "The High-Gain Antenna was designed to transmit large amounts of scientific data from Galileo to Earth and receive commands from ground control. It had a diameter of 4.8 metres. However, the antenna failed to deploy fully, forcing the mission team to rely on the Low-Gain Antennas for communication.",
         "optional": false,
-        "cost": 0,
+        "cost": 140000000,
         "x": 0.35,
         "y": 0.8,
         "w": 0.32,
@@ -554,7 +557,7 @@
         "name": "Sunshield",
         "info": "Protects the top of the spacecraft from the Sun's heat while Galileo flies close to the Sun near Venus.",
         "optional": false,
-        "cost": 0,
+        "cost": 70000000,
         "x": 0.35,
         "y": 0.97,
         "w": 0.04,
@@ -563,8 +566,8 @@
       {
         "id": "lowgain_antenna_with_sunshield",
         "file": "lowgain_antenna_with_sunshield",
-        "name": "Low-gain antenna",
-        "info": "A small omnidirectional antenna. It sends data far more slowly than the main antenna, but it doesn't need to be pointed precisely at Earth.",
+        "name": "Low-Gain Antenna (LGA)",
+        "info": "The Low-Gain Antenna provided an alternative communication system for Galileo. It received commands from Earth and transmitted telemetry and scientific data back to ground stations. Although it supported lower data transmission rates than the High-Gain Antenna, it became the spacecraft's primary means of communication after the main antenna failed to deploy fully.",
         "optional": true,
         "cost": 35000000,
         "x": 0.35,
@@ -597,7 +600,7 @@
       "C₂H₂"
     ],
     "sampleCount": 20,
-    "timeLimit": 60.0,
+    "timeLimit": 30.0,
     "sampleSeconds": 1.0
   }
 }
