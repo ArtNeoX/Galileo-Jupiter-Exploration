@@ -18,7 +18,9 @@ namespace Galileo.Screens
     public class GarageScreen : ScreenBase
     {
         const float SnapDistance = 90f;
-        const float FrameFill = 0.66f;
+        const float FrameFill = 0.86f;
+        /// <summary>Small parts get an invisible grab area at least this big.</summary>
+        const float MinGrab = 90f;
 
         class Piece
         {
@@ -47,6 +49,9 @@ namespace Galileo.Screens
         {
             _data = Content.garage;
 
+            var plate = UIFactory.Panel("TitlePlate", Root, new Color(Theme.PanelDeep.r, Theme.PanelDeep.g, Theme.PanelDeep.b, 0.82f), 16);
+            plate.raycastTarget = false;
+            plate.rectTransform.Anchor(new Vector2(0, 1), new Vector2(0, 1), new Vector2(30, -152), new Vector2(980, -24));
             UIFactory.Label("Title", Root, (_data.title ?? "").ToUpperInvariant(), 44, Theme.Accent, TextAnchor.MiddleLeft, FontStyle.Bold)
                 .rectTransform.Anchor(new Vector2(0, 1), Vector2.one, new Vector2(60, -96), new Vector2(-560, -36));
             _status = UIFactory.Label("Hint", Root, _data.hint, 24, Theme.TextMuted, TextAnchor.UpperLeft, FontStyle.Italic);
@@ -61,7 +66,11 @@ namespace Galileo.Screens
 
             _frame = ProbeAssembly.Frame("Probe", _board, ProbeAssembly.CanvasSize(_data), boardSize * FrameFill, Vector2.zero);
             _structure = ProbeAssembly.Structure(_data, _frame).gameObject.AddComponent<CanvasGroup>();
-            _outline = ProbeAssembly.Outline(_data, _frame).gameObject.AddComponent<CanvasGroup>();
+            var outline = ProbeAssembly.Outline(_data, _frame);
+            // The outline bitmap is painted white; tint it dark so it shows on the bright garage.
+            var outlineImage = outline.GetComponent<Image>();
+            if (outlineImage != null) outlineImage.color = new Color(0.16f, 0.11f, 0.09f, 0.9f);
+            _outline = outline.gameObject.AddComponent<CanvasGroup>();
             _placedLayer = UIFactory.Rect("Placed", _frame).Stretch();
             _looseLayer = UIFactory.Rect("Loose", _board).Stretch();
 
@@ -166,6 +175,13 @@ namespace Galileo.Screens
                 var img = ProbeAssembly.PartImage(piece.part, piece.placed ? _placedLayer : _looseLayer, e.id);
                 img.raycastTarget = true;
                 piece.rect = img.rectTransform;
+                if (size.x < MinGrab || size.y < MinGrab)
+                {
+                    // Invisible, bigger grab area for tiny parts (pointer events bubble up to the part).
+                    var hit = UIFactory.Line(img.transform, Color.clear);
+                    hit.raycastTarget = true;
+                    hit.rectTransform.Pin(new Vector2(0.5f, 0.5f), Vector2.Max(size, new Vector2(MinGrab, MinGrab)), Vector2.zero);
+                }
                 piece.rect.anchorMin = piece.rect.anchorMax = piece.rect.pivot = new Vector2(0.5f, 0.5f);
                 piece.rect.sizeDelta = size;
 

@@ -24,8 +24,9 @@ namespace Galileo.Screens
             Root.Find("Hint").gameObject.AddComponent<Shadow>().effectDistance = new Vector2(2, -2);
 
             _orbiter = ProbeAssembly.Composite(Content.garage, App.GaragePlaced, Root, new Vector2(1000, 620), new Vector2(-260, 80));
-            _probe = AtmosProbe(Root, new Vector2(170, 170));
-            _probe.anchoredPosition = _orbiter.anchoredPosition + new Vector2(0, -_orbiter.sizeDelta.y * 0.42f);
+            _probe = AtmosProbe(Root, new Vector2(170, 260));
+            // Under the probe body (left of the canvas centre in the orbiter art).
+            _probe.anchoredPosition = _orbiter.anchoredPosition + new Vector2(-_orbiter.sizeDelta.x * 0.2f, -_orbiter.sizeDelta.y * 0.22f);
             _probe.SetSiblingIndex(_orbiter.GetSiblingIndex()); // behind the orbiter
 
             _separate = UIFactory.Button("Separate", Root, data.separate, Release);
@@ -33,14 +34,40 @@ namespace Galileo.Screens
             _separate.transform.Find("Label").GetComponent<Text>().fontSize = 36;
         }
 
-        /// <summary>atmospheric_probe.png from Resources/Galileo/Episode2/, or the probe icon.</summary>
+        static Sprite _probeSprite;
+
+        /// <summary>
+        /// atmospheric_probe.png from Resources/Galileo/Episode2/, cropped to its visible pixels (it may be painted
+        /// on a large canvas), or the probe icon. <paramref name="size"/> is the box it is fitted into.
+        /// </summary>
         public static RectTransform AtmosProbe(Transform parent, Vector2 size)
         {
-            var sprite = ContentLoader.LoadSprite("Galileo/Episode2/atmospheric_probe");
+            if (_probeSprite == null)
+            {
+                var full = ContentLoader.LoadSprite("Galileo/Episode2/atmospheric_probe");
+                if (full != null)
+                {
+                    var b = ProbeAssembly.VisibleBounds(full);
+                    var r = full.rect;
+                    var px = Rect.MinMaxRect(Mathf.Floor(r.x + b.xMin * r.width), Mathf.Floor(r.y + b.yMin * r.height),
+                        Mathf.Min(r.xMax, Mathf.Ceil(r.x + b.xMax * r.width)), Mathf.Min(r.yMax, Mathf.Ceil(r.y + b.yMax * r.height)));
+                    _probeSprite = Sprite.Create(full.texture, px, new Vector2(0.5f, 0.5f), 100f, 0, SpriteMeshType.FullRect);
+                }
+            }
+            var sprite = _probeSprite;
             var img = UIFactory.Picture("Atmospheric Probe", parent, sprite != null ? sprite : ProceduralArt.Icon("probe"),
                 sprite != null ? Color.white : Theme.Accent);
+            if (sprite != null)
+            {
+                // Fit the picture's own proportions into the box.
+                float aspect = sprite.rect.width / sprite.rect.height;
+                size = aspect > size.x / size.y ? new Vector2(size.x, size.x / aspect) : new Vector2(size.y * aspect, size.y);
+            }
             img.rectTransform.Pin(new Vector2(0.5f, 0.5f), size, Vector2.zero);
-            if (sprite == null) img.gameObject.AddComponent<Outline>().effectColor = new Color(0.15f, 0.1f, 0.08f, 0.9f);
+            // A dark edge so the pale probe reads on the cream clouds and on the planet.
+            var outline = img.gameObject.AddComponent<Outline>();
+            outline.effectColor = new Color(0.15f, 0.1f, 0.08f, 0.85f);
+            outline.effectDistance = new Vector2(2, -2);
             return img.rectTransform;
         }
 

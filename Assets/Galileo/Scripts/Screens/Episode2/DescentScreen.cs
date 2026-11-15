@@ -50,7 +50,7 @@ namespace Galileo.Screens
             _streaks.raycastTarget = false;
             _streaks.uvRect = new Rect(0, 0, 2, 1);
 
-            _probe = SeparationScreen.AtmosProbe(Root, new Vector2(300, 300));
+            _probe = SeparationScreen.AtmosProbe(Root, new Vector2(320, 600));
 
             var shade = UIFactory.Picture("TopShade", Root, ProceduralArt.VerticalGradient(new Color(0, 0, 0, 0.55f), new Color(0, 0, 0, 0)), Color.white);
             shade.preserveAspect = false;
