@@ -39,7 +39,8 @@ namespace Galileo.Screens
             ApplyPortrait(portrait, dialog.speakerId);
 
             // Speaker name, just above the box on the left
-            UIFactory.Label("Speaker", Root, speaker != null ? speaker.name.ToUpperInvariant() : "", 26, Theme.Accent,
+            var speakerName = !string.IsNullOrEmpty(dialog.speakerName) ? dialog.speakerName : speaker != null ? speaker.name : "";
+            UIFactory.Label("Speaker", Root, speakerName.ToUpperInvariant(), 26, Theme.Accent,
                     TextAnchor.LowerLeft, FontStyle.Bold)
                 .rectTransform.Anchor(new Vector2(0, 0), new Vector2(1, 0), new Vector2(206, 316), new Vector2(-180, 356));
 

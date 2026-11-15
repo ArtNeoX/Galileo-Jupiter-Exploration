@@ -64,6 +64,14 @@ namespace Galileo.Content
         public string recommendationLabel = "Рекомендация инженерной группы";
         public string finalDecisionLabel = "Итоговое решение";
         public string designedFormat = "Спроектировано систем: {0} из {1}";
+
+        // Scene 4 analyses
+        public string analysis = "Анализ";
+        public string info = "Инфо";
+        public string returnLabel = "Вернуться";
+        public string check = "Проверить";
+        public string analysisRequired = "Сначала выполните анализ";
+        public string analysisDone = "Анализ выполнен";
     }
 
     [Serializable]
@@ -145,6 +153,8 @@ namespace Galileo.Content
         public string speakerId;
         public string[] lines;
         public bool portraitLeft;
+        /// <summary>Overrides the character's name (for speakers who aren't team members).</summary>
+        public string speakerName;
         public Action onFinished;
     }
 
@@ -237,6 +247,42 @@ namespace Galileo.Content
         /// <summary>Characters on the left and right of the system screen; each presents one option.</summary>
         public string[] speakers = Array.Empty<string>();
         public DesignOptionInfo[] options = Array.Empty<DesignOptionInfo>();
+        /// <summary>The ANALYSIS button on the system screen. No type = no button.</summary>
+        public AnalysisData analysis = new AnalysisData();
+    }
+
+    /// <summary>
+    /// What the ANALYSIS button on a system screen opens:
+    ///   mass     — calculate the mass of an equal volume of each material (uses each option's density)
+    ///   matching — sort both options' pros and cons (bullet lines of their pros / cons) into four columns
+    ///   engineer — a short dialog with an engineer bitmap (no player task)
+    /// </summary>
+    [Serializable]
+    public class AnalysisData
+    {
+        public string type;
+        /// <summary>The options' Test buttons stay locked until this analysis is completed.</summary>
+        public bool required;
+        public string title = "";
+        public string hint = "";
+        public string successMessage = "";
+        public string errorMessage = "";
+
+        // mass
+        /// <summary>Sample volume in m³.</summary>
+        public float volume = 0.1f;
+        public string volumeFormat = "V = {0} м³";
+        public string massLabel = "m =";
+        public string massUnit = "кг";
+        /// <summary>An answer counts when it is within this fraction of the exact mass.</summary>
+        public float tolerance = 0.005f;
+        public string infoTitle = "";
+
+        // engineer
+        /// <summary>Bitmap in Resources/Galileo/Characters/ (needn't be a team member).</summary>
+        public string speakerId = "engineer_angry";
+        public string speakerName = "";
+        public string[] lines = Array.Empty<string>();
     }
 
     [Serializable]
@@ -252,6 +298,12 @@ namespace Galileo.Content
         public string resultTitle;
         public string result;
         public string recommendation;
+        /// <summary>Material density in kg/m³ (mass analysis).</summary>
+        public float density;
+        /// <summary>Sample bitmap in Resources/Galileo/Analysis/ for the mass analysis (square).</summary>
+        public string sample;
+        /// <summary>If set, the option screen shows this long text instead of behaviour / pros / cons.</summary>
+        public string detailText;
     }
 
     public static class ContentLoader

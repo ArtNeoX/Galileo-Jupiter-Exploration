@@ -56,6 +56,8 @@ namespace Galileo
         {
             SelectedConcept = null;
             CompletedSystems.Clear();
+            AnalysedSystems.Clear();
+            MatchingPlacement.Clear();
             _optionOrder.Clear();
             SetBackground(defaultBackground);
             SetBackgroundDim(true);
@@ -69,10 +71,14 @@ namespace Galileo
         /// <summary>The dialog the next <see cref="DialogScreen"/> plays.</summary>
         public DialogRequest PendingDialog { get; private set; }
 
-        public void ShowDialog(string speakerId, string[] lines, System.Action onFinished, bool portraitLeft = false)
+        public void ShowDialog(string speakerId, string[] lines, System.Action onFinished, bool portraitLeft = false,
+            string speakerName = null)
         {
             PendingDialog = new DialogRequest
-                { speakerId = speakerId, lines = lines, onFinished = onFinished, portraitLeft = portraitLeft };
+            {
+                speakerId = speakerId, lines = lines, onFinished = onFinished, portraitLeft = portraitLeft,
+                speakerName = speakerName
+            };
             Show<DialogScreen>();
         }
 
@@ -129,13 +135,54 @@ namespace Galileo
 
         public void RunTest() => Show<TestScreen>();
 
+        // ---------- Scene 4 analyses (the ANALYSIS button on a system screen) ----------
+
+        /// <summary>Systems whose analysis the player has completed.</summary>
+        public readonly System.Collections.Generic.HashSet<string> AnalysedSystems =
+            new System.Collections.Generic.HashSet<string>();
+
+        /// <summary>Pros/cons matching: where each card currently is, per system (kept while the player reads the options).</summary>
+        public readonly System.Collections.Generic.Dictionary<string, int[]> MatchingPlacement =
+            new System.Collections.Generic.Dictionary<string, int[]>();
+
+        public static bool HasAnalysis(DesignSystemInfo system) =>
+            system.analysis != null && !string.IsNullOrEmpty(system.analysis.type);
+
+        /// <summary>False while a required analysis is still to do (the options can't be tested yet).</summary>
+        public bool CanDecide(DesignSystemInfo system) =>
+            !HasAnalysis(system) || !system.analysis.required || AnalysedSystems.Contains(system.id);
+
+        public void ShowAnalysis()
+        {
+            var system = CurrentSystem;
+            var analysis = system.analysis;
+            switch (analysis.type)
+            {
+                case "mass": Show<MassAnalysisScreen>(); break;
+                case "matching": Show<MatchingAnalysisScreen>(); break;
+                default: // engineer
+                    ShowDialog(analysis.speakerId, analysis.lines, () => CompleteAnalysis(), false, analysis.speakerName);
+                    break;
+            }
+        }
+
+        /// <summary>Marks the current system's analysis done and returns to its screen.</summary>
+        public void CompleteAnalysis()
+        {
+            AnalysedSystems.Add(CurrentSystem.id);
+            ShowSystem(CurrentSystem);
+        }
+
+        public void MarkAnalysed() => AnalysedSystems.Add(CurrentSystem.id);
+
         /// <summary>Dev shortcut L: skips the orbiter design, sets the right launch window, or hits the green zone.</summary>
         void Update()
         {
             var k = UnityEngine.InputSystem.Keyboard.current;
             if (k == null || !k.lKey.wasPressedThisFrame) return;
             if (_current is SystemsListScreen || _current is SystemScreen ||
-                _current is OptionScreen || _current is TestScreen)
+                _current is OptionScreen || _current is TestScreen ||
+                _current is MassAnalysisScreen || _current is MatchingAnalysisScreen)
                 SkipOrbiterDesign();
             else if (_current is GravityAssistScreen gravity)
                 gravity.SetWindow(gravity.CorrectStartDay, gravity.CorrectEndDay);

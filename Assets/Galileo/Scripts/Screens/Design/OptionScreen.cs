@@ -36,9 +36,12 @@ namespace Galileo.Screens
             UIFactory.Line(card.transform, Theme.Line).rectTransform
                 .Anchor(new Vector2(0, 1), new Vector2(1, 1), new Vector2(40, -152), new Vector2(-40, -150));
 
-            var body = Section(Ui.behaviorLabel, option.behavior) +
-                       Section(Ui.prosLabel, option.pros, Theme.ProsHex) +
-                       Section(Ui.consLabel, option.cons, Theme.ConsHex);
+            // Systems with a pros/cons analysis show the long description instead of ready-made lists.
+            var body = !string.IsNullOrEmpty(option.detailText)
+                ? option.detailText
+                : Section(Ui.behaviorLabel, option.behavior) +
+                  Section(Ui.prosLabel, option.pros, Theme.ProsHex) +
+                  Section(Ui.consLabel, option.cons, Theme.ConsHex);
             UIFactory.Label("Info", card.transform, body.TrimEnd(), 26, Theme.Text).BestFit(14, 26).rectTransform
                 .Anchor(Vector2.zero, Vector2.one, new Vector2(40, 120), new Vector2(-40, -170));
 
@@ -46,6 +49,14 @@ namespace Galileo.Screens
             test.GetComponent<RectTransform>().Pin(new Vector2(1, 0), new Vector2(280, 76), new Vector2(-34, 30));
             UIFactory.Picture("Play", test.transform, ProceduralArt.Icon("play"), Theme.ButtonText).rectTransform
                 .Pin(new Vector2(1, 0.5f), new Vector2(24, 24), new Vector2(-30, 0));
+
+            // The decision waits for the system's analysis.
+            if (!App.CanDecide(system))
+            {
+                test.interactable = false;
+                UIFactory.Label("Locked", card.transform, Ui.analysisRequired, 24, Theme.Failure, TextAnchor.MiddleRight, FontStyle.Italic)
+                    .rectTransform.Anchor(new Vector2(0, 0), new Vector2(1, 0), new Vector2(40, 30), new Vector2(-340, 106));
+            }
         }
     }
 }

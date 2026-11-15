@@ -140,6 +140,36 @@ namespace Galileo.UI
             return btn;
         }
 
+        /// <summary>Single-line text box on a dark rounded panel. The returned field's frame is its child "Frame".</summary>
+        public static InputField InputField(string name, Transform parent, int fontSize, string placeholder = "")
+        {
+            var bg = Panel(name, parent, Theme.PanelDeep, 12);
+            Frame(bg.transform, Theme.AccentDark, 12, 2);
+            var text = Label("Text", bg.transform, "", fontSize, Theme.Text, TextAnchor.MiddleCenter, FontStyle.Bold);
+            text.supportRichText = false;
+            text.horizontalOverflow = HorizontalWrapMode.Overflow;
+            text.rectTransform.Stretch(14, 4, 14, 4);
+            var hint = Label("Placeholder", bg.transform, placeholder, fontSize, Theme.TextMuted * new Color(1, 1, 1, 0.5f),
+                TextAnchor.MiddleCenter, FontStyle.Italic);
+            hint.rectTransform.Stretch(14, 4, 14, 4);
+
+            var field = bg.gameObject.AddComponent<InputField>();
+            field.targetGraphic = bg;
+            field.textComponent = text;
+            field.placeholder = hint;
+            field.lineType = UnityEngine.UI.InputField.LineType.SingleLine;
+            field.caretColor = Theme.Accent;
+            field.customCaretColor = true;
+            field.caretWidth = 3;
+            field.selectionColor = new Color(Theme.Accent.r, Theme.Accent.g, Theme.Accent.b, 0.35f);
+            var colors = field.colors;
+            colors.normalColor = Color.white;
+            colors.highlightedColor = new Color(1.15f, 1.15f, 1.15f);
+            colors.disabledColor = Color.white;
+            field.colors = colors;
+            return field;
+        }
+
         /// <summary>Square accent button holding a single icon (e.g. the back chevron).</summary>
         public static Button IconButton(string name, Transform parent, Sprite icon, Action onClick)
         {

@@ -211,6 +211,16 @@ namespace Galileo.UI
                     return p => Min(
                         Outline(RectSdf(p, Vector2.zero, 0.7f, 0.5f), W),
                         RectSdf(p, Vector2.zero, 0.55f, 0.35f));
+                case "cube": // isometric outline cube (material sample placeholder)
+                {
+                    var hex = new Vector2[6];
+                    for (int i = 0; i < 6; i++) hex[i] = Polar(0.82f, 30f + 60f * i);
+                    return p => Min(
+                        Outline(ConvexPolygon(p, hex), W * 1.2f),
+                        Segment(p, Vector2.zero, hex[1], W),
+                        Segment(p, Vector2.zero, hex[3], W),
+                        Segment(p, Vector2.zero, hex[5], W));
+                }
                 case "layers": // multilayer insulation
                     return p => Min(
                         Segment(p, new Vector2(-0.7f, 0.5f), new Vector2(0.55f, 0.5f), W),
